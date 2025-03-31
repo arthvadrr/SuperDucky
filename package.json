@@ -1,0 +1,32 @@
+{
+	"name": "superducky",
+	"version": "1.0.0",
+	"description": "SuperDucky is my twitch bot",
+	"private": true,
+	"homepage": "https://github.com/arthvadrr/SuperDucky#readme",
+	"author": "arthvadrr",
+	"license": "GNU AGPLv3",
+	"engines": {
+		"node": ">=23.10.0"
+	},
+	"keywords": [
+		"twitch",
+		"bot",
+		"superducky",
+		"arthvadrr"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/arthvadrr/SuperDucky.git"
+	},
+	"bugs": {
+		"url": "https://github.com/arthvadrr/SuperDucky/issues"
+	},
+	"scripts": {
+		"dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix overlay\"",
+		"install-all": "npm install && npm install --prefix server && npm install --prefix overlay"
+	},
+	"devDependencies": {
+		"concurrently": "^8.2.0"
+	}
+}
