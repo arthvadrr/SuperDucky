@@ -37,13 +37,13 @@ Contains the client-side application built with React and TypeScript, meant to b
 
 ### Running the Application
 
-1. **Start the Application:**
+From root, you can run
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
-The client will connect to the server on port `3050` via Socket.IO.
+The client will connect to the server on port `3050` via Socket.IO. The client application runs on `:5173`.
 
 ## Environment Variables
 
