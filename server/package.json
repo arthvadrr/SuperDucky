@@ -29,6 +29,7 @@
 		"axios": "^1.8.4",
 		"dotenv": "^16.4.7",
 		"express": "^4.21.2",
+		"socket.io": "^4.8.1",
 		"tmi.js": "^1.8.5"
 	},
 	"devDependencies": {
