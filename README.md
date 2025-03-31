@@ -1,7 +1,7 @@
 # SuperDucky
 
 <p>
-  <img src="public/images/super-ducky.jpg" alt="SuperDucky" width="200" style="border-radius: 12px;" />
+  <img src="public/images/super-ducky.jpg" alt="SuperDucky" width="200" />
 </p>
 
 SuperDucky is my twitch bot!
@@ -31,13 +31,13 @@ Contains the client-side application built with React and TypeScript, meant to b
 
 ### Installation
 
-1. Install dependencies:
+Install dependencies:
 
-   ```bash
-   npm run install-all
-   ```
+```bash
+npm run install-all
+```
 
-   This will install dependencies in root, server, and overlay directories (managed seperately).
+This will install dependencies in root, server, and overlay directories (managed seperately).
 
 ### Running the Application
 
@@ -47,7 +47,7 @@ From root, you can run
 npm run dev
 ```
 
-The client will connect to the server on port `3050` via Socket.IO. The client application runs on `:5173`.
+The client will connect to the server on port `3050` and runs on `:5173` (or whatever is open for vite).
 
 ## Environment Variables
 
@@ -77,11 +77,3 @@ VITE_SOCKET_HOST=http://localhost:3050
 ## License
 
 [GNU GPLv3](LICENSE)
-
-## Development Notes
-
-- Root scripts allow quick startup and setup:
-  - `npm run install-all` installs everything
-  - `npm run dev` starts both server and client together
-- The server runs first to ensure the client can connect immediately
-- Environment variable templates are located in each subdirectory
