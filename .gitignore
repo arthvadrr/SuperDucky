@@ -17,10 +17,13 @@ npm-debug.log*
 .vscode/
 .nova/
 
-# Environment files
-.env*
-.env-local
-tokens.js
+# Environment files (ignore all .env files except examples)
+**/.env*
+!**/.env-example
+
+# Token files (ignore all tokens.js files except examples)
+**/tokens.json
+!**/tokens-example.json
 
 # Coverage directory
 coverage/
