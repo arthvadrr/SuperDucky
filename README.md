@@ -1,8 +1,7 @@
 # SuperDucky
 
 <p>
-<style>#ducky-img {border-radius: 20px;}</style>
-  <img id="ducky-img" src="public/images/super-ducky.jpg" alt="SuperDucky" width="200" />
+  <img src="public/images/super-ducky.jpg" alt="SuperDucky" width="200" style="border-radius: 12px;" />
 </p>
 
 SuperDucky is my twitch bot!
