@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import type { Express } from 'express';
 import type { Response } from 'express';
+import { initializeSocketServer } from './socket';
 
 dotenv.config({ path: '.env-local' });
 
@@ -14,7 +15,9 @@ export function startServer(): void {
 		res.send('SuperDucky is running!');
 	});
 
-	app.listen(port, () =>
+	const httpServer = app.listen(port, () =>
 		console.log(`Server running on http://${host}:${port}`)
 	);
+
+	initializeSocketServer(httpServer);
 }
