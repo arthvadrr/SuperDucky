@@ -1,29 +1,36 @@
-# Node modules
+# Node modules for the entire project
 node_modules/
 
-# Build output
+# Build output directories (compiled code)
 dist/
+server/dist/
+overlay/dist/
+overlay/dist-ssr/
 
-# Logs
+# Logs and debug files
 logs/
 *.log
 npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# OS generated files
+# OS-specific files
 .DS_Store
+Thumbs.db
 
-# IDE & Editor directories
-.idea/
+# IDE and editor config directories
 .vscode/
+.idea/
 .nova/
 
 # Environment files (ignore all .env files except examples)
 **/.env*
 !**/.env-example
 
-# Token files (ignore all tokens.js files except examples)
+# Token files (ignore sensitive tokens, keep examples)
 **/tokens.json
 !**/tokens-example.json
 
-# Coverage directory
+# Coverage reports (if using tests)
 coverage/
