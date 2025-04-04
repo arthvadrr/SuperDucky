@@ -1,7 +1,7 @@
 # SuperDucky
 
 <p>
-  <img src="public/images/super-ducky.jpg" alt="SuperDucky" width="200" />
+  <img src="overlay/public/animations/ducky-talking.webp" alt="SuperDucky" width="200" />
 </p>
 
 SuperDucky is my twitch bot!
