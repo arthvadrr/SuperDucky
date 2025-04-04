@@ -1,0 +1,29 @@
+.scaffold {
+  height: 100vh;
+
+  .grid {
+    height: 100%;
+    display: grid;
+    grid-template-areas:
+      'header header sidebar'
+      'body body sidebar';
+  }
+
+  .grid > div:nth-child(1) {
+    grid-area: header;
+    background-color: red;
+  }
+
+  .grid > div:nth-child(2) {
+    position: relative;
+    grid-area: body;
+    display: grid;
+    align-items: end;
+    background-color: green;
+  }
+
+  .grid > div:nth-child(3) {
+    grid-area: sidebar;
+    background-color: blue;
+  }
+}

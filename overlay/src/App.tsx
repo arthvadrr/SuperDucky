@@ -1,12 +1,12 @@
-import ChatMessage from './components/ChatMessage';
+import Scaffold from './sections/Scaffold';
 import './styles/App.scss';
 
 function App() {
-	return (
-		<>
-			<ChatMessage />
-		</>
-	);
+  return (
+    <>
+      <Scaffold />
+    </>
+  );
 }
 
 export default App;

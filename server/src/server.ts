@@ -1,10 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
 import type { Express } from 'express';
 import type { Response } from 'express';
 import { initializeSocketServer } from './socket';
 
-dotenv.config({ path: '.env-local' });
+dotenv.config({ path: path.resolve(__dirname, '../../.env-local') });
 
 export function startServer(): void {
 	const app: Express = express();
