@@ -1,24 +1,24 @@
+import { initializeSocketServer } from './socket';
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
-import type { Express } from 'express';
-import type { Response } from 'express';
-import { initializeSocketServer } from './socket';
+import type { Express, Response } from 'express';
+import type { Server } from 'http';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env-local') });
 
 export function startServer(): void {
-	const app: Express = express();
-	const host = process.env.HOST || 'localhost';
-	const port = process.env.PORT || 3050;
+  const app: Express = express();
+  const host: string = process.env.HOST || 'localhost';
+  const port: number = Number(process.env.PORT) || 3050;
 
-	app.get('/', (_: unknown, res: Response): void => {
-		res.send('SuperDucky is running!');
-	});
+  app.get('/', (_: unknown, res: Response): void => {
+    res.send('SuperDucky is running!');
+  });
 
-	const httpServer = app.listen(port, () =>
-		console.log(`Server running on http://${host}:${port}`)
-	);
+  const httpServer: Server = app.listen(port, () =>
+    console.log(`Server running on http://${host}:${port}`),
+  );
 
-	initializeSocketServer(httpServer);
+  initializeSocketServer(httpServer);
 }

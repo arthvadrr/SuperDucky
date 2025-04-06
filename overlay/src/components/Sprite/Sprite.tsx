@@ -2,13 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import type { CSSProperties, Dispatch, RefObject, SetStateAction } from 'react';
 import '../../styles/Sprite.scss';
 
-export type SpriteStateImgURL = string;
+/**
+ * Types and interfaces
+ */
 export type SpriteStateKey = 'idle' | 'walking' | 'talking';
 
 export interface SpriteState {
-  idle: SpriteStateImgURL;
-  walking: SpriteStateImgURL;
-  talking: SpriteStateImgURL;
+  idle: string;
+  walking: string;
+  talking: string;
 }
 
 export interface SpriteProps {
@@ -26,6 +28,9 @@ export interface SpriteProps {
   walkingEnabled?: boolean;
 }
 
+/**
+ * Walking animation
+ */
 function animateWalking(
   spriteRef: RefObject<HTMLImageElement | null>,
   x: number,
@@ -62,6 +67,9 @@ function animateWalking(
   }
 }
 
+/**
+ * FC Sprite
+ */
 export default function Sprite({
   states,
   speed = 1,

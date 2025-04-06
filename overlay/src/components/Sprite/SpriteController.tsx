@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import Sprite, { SpriteState } from './Sprite';
+import { useSprites } from '../../context/SpriteContext';
 
 export interface SpriteInstance {
   id: string;
@@ -9,22 +9,8 @@ export interface SpriteInstance {
   action: 'idle' | 'walking' | 'talking';
 }
 
-const initialSprites: SpriteInstance[] = [
-  {
-    id: 'ducky',
-    states: {
-      idle: '/images/super-ducky-transparent.webp',
-      walking: '/animations/ducky-walking.webp',
-      talking: '/animations/ducky-talking.webp',
-    },
-    size: { x: 264, y: 264 },
-    position: { x: 0, y: 0 },
-    action: 'walking',
-  },
-];
-
 export default function SpriteController() {
-  const [sprites, _] = useState<SpriteInstance[]>(initialSprites);
+  const { sprites } = useSprites();
 
   return (
     <>
