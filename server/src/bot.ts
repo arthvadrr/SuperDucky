@@ -1,11 +1,12 @@
 import { promises as fs } from 'fs';
-import { Bot } from '@twurple/easy-bot';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { getSocketServer } from './socket';
+import { Bot } from '@twurple/easy-bot';
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: '../env-local' });
+dotenv.config({ path: path.resolve(__dirname, '../../.env.server.local') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
 
 export async function startDucky(): Promise<void> {
   const clientId: string = process.env.CLIENT_ID ?? '';
@@ -73,11 +74,11 @@ export async function startDucky(): Promise<void> {
   const userId = await authProvider.addUserForToken(tokenData);
   authProvider.addIntentsToUser(userId, ['chat']);
 
-  console.log('Joining channel...', process.env.TWITCH_CHANNEL);
+  console.log('Joining channel...', process.env.VITE_TWITCH_CHANNEL);
 
   const bot = new Bot({
     authProvider,
-    channels: [process.env.TWITCH_CHANNEL ?? ''],
+    channels: [process.env.VITE_TWITCH_CHANNEL ?? ''],
   });
 
   bot.onMessage((ctx) => {

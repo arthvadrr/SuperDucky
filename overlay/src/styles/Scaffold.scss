@@ -11,7 +11,7 @@
 
   .grid > div:nth-child(1) {
     grid-area: header;
-    background-color: red;
+    // background-color: red;
   }
 
   .grid > div:nth-child(2) {
@@ -19,11 +19,11 @@
     grid-area: body;
     display: grid;
     align-items: end;
-    background-color: green;
+    // background-color: green;
   }
 
   .grid > div:nth-child(3) {
     grid-area: sidebar;
-    background-color: blue;
+    // background-color: blue;
   }
 }
