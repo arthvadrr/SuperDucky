@@ -4,13 +4,12 @@ import { createContext } from 'react';
  * Interfaces
  */
 export interface MessageInstance {
-  id: string;
   username: string;
-  message: string;
+  command: string;
 }
 
 export interface MessageContextType {
-  messages: MessageInstance[];
+  userMessages: MessageInstance[];
   addMessage: (msg: MessageInstance) => void;
 }
 

@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import type { CSSProperties, Dispatch, RefObject, SetStateAction } from 'react';
+import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
 
 /**
  * Types and interfaces
  */
-export type SpriteStateKey = 'idle' | 'walking' | 'talking';
+export type SpriteStateKey = 'idle' | 'walk' | 'talk';
 
-export interface SpriteState {
+export interface SpriteStateAssets {
   idle: string;
-  walking: string;
-  talking: string;
+  walk: string;
+  talk: string;
 }
 
 export interface SpriteProps {
-  states: SpriteState;
+  assets: SpriteStateAssets;
+  state?: SpriteStateKey;
   speed?: number;
   size: {
     x: number;
@@ -24,99 +25,64 @@ export interface SpriteProps {
     x: number;
     y: number;
   };
-  action?: SpriteStateKey;
-  walkingEnabled?: boolean;
-}
-
-/**
- * Walking animation
- */
-function animateWalking(
-  spriteRef: RefObject<HTMLImageElement | null>,
-  x: number,
-  x_Delta: number,
-  speed: number,
-  setX: Dispatch<SetStateAction<number>>,
-  set_x_Delta: Dispatch<SetStateAction<number>>,
-  frameRef: RefObject<number | null>,
-) {
-  const sprite = spriteRef.current;
-
-  if (sprite && sprite.parentElement) {
-    const parentWidth = sprite.parentElement.clientWidth;
-    const width = sprite.clientWidth;
-    const newX = x + x_Delta * speed;
-
-    if (newX <= 0 || newX + width >= parentWidth) {
-      set_x_Delta((prev) => -prev);
-    } else {
-      setX(newX);
-    }
-
-    frameRef.current = requestAnimationFrame(() =>
-      animateWalking(
-        spriteRef,
-        newX,
-        x_Delta,
-        speed,
-        setX,
-        set_x_Delta,
-        frameRef,
-      ),
-    );
-  }
 }
 
 /**
  * FC Sprite
  */
 export default function Sprite({
-  states,
+  assets,
   speed = 1,
   size,
   position = { x: 0, y: 0 },
-  action = 'idle',
+  state = 'idle',
 }: SpriteProps) {
-  const [currentAction, _] = useState<SpriteStateKey>(action);
   const spriteRef = useRef<HTMLImageElement>(null);
-  const [x, setX] = useState(position.x);
-  const [x_Delta, set_x_Delta] = useState(1);
-  const animationFrameRef = useRef<number | null>(null);
+  const [posX, setPosX] = useState(position.x);
+  const [deltaX, setDeltaX] = useState(1);
+  const frameRef = useRef<number | null>(null);
+
+  function animateWalk() {
+    const sprite = spriteRef.current;
+
+    if (sprite && sprite.parentElement) {
+      const parentWidth = sprite.parentElement.clientWidth;
+      const width = sprite.clientWidth;
+      const newX = posX + deltaX * speed;
+
+      if (newX <= 0 || newX + width >= parentWidth) {
+        setDeltaX((prev) => -prev);
+      } else {
+        setPosX(newX);
+      }
+
+      frameRef.current = requestAnimationFrame(animateWalk);
+    }
+  }
 
   useEffect(() => {
-    if (currentAction === 'walking') {
-      animationFrameRef.current = requestAnimationFrame(() =>
-        animateWalking(
-          spriteRef,
-          x,
-          x_Delta,
-          speed,
-          setX,
-          set_x_Delta,
-          animationFrameRef,
-        ),
-      );
+    if (state === 'walk') {
+      frameRef.current = requestAnimationFrame(animateWalk);
     }
-
     return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [currentAction, x, x_Delta, speed, size.x]);
+  }, [state, posX, deltaX, speed]);
 
   const styleVars: CSSProperties = {
     '--width': `auto`,
     '--height': `${size.y}px`,
-    '--left': `${x}px`,
+    '--left': `${posX}px`,
     '--bottom': `${position.y}px`,
-    '--transform': x_Delta < 0 ? 'scaleX(-1)' : 'scaleX(1)',
+    '--transform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
   } as CSSProperties;
 
   return (
     <img
       ref={spriteRef}
-      src={states[currentAction]}
+      src={assets[state]}
       className="sprite"
       style={styleVars}
     />

@@ -5,28 +5,14 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import { MessageContext } from './MessageContext';
+import { MessageContext, MessageInstance } from './MessageContext';
+import type { SpriteInstance } from '../components/Sprite/SpriteController';
 
-/**
- * Interfaces
- */
-export interface SpriteState {
-  idle: string;
-  walking: string;
-  talking: string;
-}
-
-export interface SpriteInstance {
-  id: string;
-  states: SpriteState;
-  size: { x: number; y: number };
-  position: { x: number; y: number };
-  action: 'idle' | 'walking' | 'talking';
-}
+export type Sprites = Record<string, SpriteInstance>;
 
 export interface SpriteContextType {
-  sprites: SpriteInstance[];
-  setSprites: React.Dispatch<React.SetStateAction<SpriteInstance[]>>;
+  sprites: Sprites;
+  setSprites: React.Dispatch<React.SetStateAction<Sprites>>;
 }
 
 /**
@@ -52,22 +38,34 @@ export function useSprites() {
  */
 export function SpriteProvider({ children }: { children: ReactNode }) {
   const messages = useContext(MessageContext);
-  const [sprites, setSprites] = useState<SpriteInstance[]>([
-    {
-      id: 'arthvadrr',
-      states: {
+  const [sprites, setSprites] = useState<Sprites>({
+    arthvadrr: {
+      assets: {
         idle: '/images/super-ducky-transparent.webp',
-        walking: '/animations/ducky-walking.webp',
-        talking: '/animations/ducky-talking.webp',
+        walk: '/animations/ducky-walking.webp',
+        talk: '/animations/ducky-talking.webp',
       },
+      state: 'walk',
       size: { x: 264, y: 264 },
       position: { x: 0, y: 0 },
-      action: 'walking',
     },
-  ]);
+  });
 
   useEffect(() => {
-    console.log('received:', messages);
+    const updatedSprites = { ...sprites };
+
+    messages?.userMessages.forEach((message: MessageInstance) => {
+      const { username, command } = message;
+
+      if (
+        updatedSprites?.[username] &&
+        (command === 'idle' || command === 'walk' || command === 'talk')
+      ) {
+        updatedSprites[username].state = command;
+      }
+    });
+
+    setSprites(updatedSprites);
   }, [messages]);
 
   return (

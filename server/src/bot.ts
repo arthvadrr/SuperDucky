@@ -100,6 +100,15 @@ export async function startDucky(): Promise<void> {
           username: ctx.userDisplayName,
         });
       }
+
+      if (command === 'idle' || command === 'stop') {
+        ctx.reply('quack! 🛑');
+
+        getSocketServer().emit('message', {
+          command: 'idle',
+          username: ctx.userDisplayName,
+        });
+      }
     }
   });
 

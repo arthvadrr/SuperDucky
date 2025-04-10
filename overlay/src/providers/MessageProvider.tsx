@@ -7,14 +7,10 @@ import socket from '../socket';
  * Create the provider
  */
 export function MessageProvider({ children }: { children: ReactNode }) {
-  const [messages, setMessages] = useState<MessageInstance[]>([]);
-
-  console.log('msv OUTSIDEUE msg:', messages);
+  const [userMessages, setUserMessages] = useState<MessageInstance[]>([]);
 
   const addMessage = useCallback((msg: MessageInstance) => {
-    console.log('addmessage msg:', msg);
-
-    setMessages((prev) => {
+    setUserMessages((prev) => {
       if (prev.length >= 30) {
         return [...prev.slice(1), msg];
       }
@@ -26,10 +22,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
    * Memoize our function reference for cleanup
    */
   const onReceiveMessage = useCallback(
-    (message: MessageInstance) => {
-      console.log('listened, received message! (onReceiveMessage)');
-      addMessage(message);
-    },
+    (message: MessageInstance) => addMessage(message),
     [addMessage],
   );
 
@@ -37,7 +30,6 @@ export function MessageProvider({ children }: { children: ReactNode }) {
    * Listen for messages
    */
   useEffect(() => {
-    console.log('listened, received message! (useEffect)');
     socket.on('message', onReceiveMessage);
 
     return () => {
@@ -45,12 +37,8 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     };
   }, [onReceiveMessage]);
 
-  useEffect(() => {
-    console.log('New message received, current messages:', messages);
-  }, [messages]);
-
   return (
-    <MessageContext.Provider value={{ messages, addMessage }}>
+    <MessageContext.Provider value={{ userMessages, addMessage }}>
       {children}
     </MessageContext.Provider>
   );
