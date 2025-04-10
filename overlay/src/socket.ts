@@ -1,5 +1,9 @@
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3050');
+const socket = io(
+  `http://${import.meta.env.VITE_SERVER_HOST ?? 'localhost'}:${import.meta.env.VITE_SERVER_PORT ?? '3099'}`,
+);
+
+console.log('socket:', socket);
 
 export default socket;

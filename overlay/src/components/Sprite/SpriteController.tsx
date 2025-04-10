@@ -1,40 +1,25 @@
-import { useState } from 'react';
-import Sprite, { SpriteState } from './Sprite';
+import Sprite, { SpriteStateAssets } from './Sprite';
+import { useSprites } from '../../context/SpriteContext';
 
 export interface SpriteInstance {
-  id: string;
-  states: SpriteState;
+  assets: SpriteStateAssets;
+  state: 'idle' | 'walk' | 'talk';
   size: { x: number; y: number };
   position: { x: number; y: number };
-  action: 'idle' | 'walking' | 'talking';
 }
 
-const initialSprites: SpriteInstance[] = [
-  {
-    id: 'ducky',
-    states: {
-      idle: '/images/super-ducky-transparent.webp',
-      walking: '/animations/ducky-walking.webp',
-      talking: '/animations/ducky-talking.webp',
-    },
-    size: { x: 264, y: 264 },
-    position: { x: 0, y: 0 },
-    action: 'walking',
-  },
-];
-
 export default function SpriteController() {
-  const [sprites, _] = useState<SpriteInstance[]>(initialSprites);
+  const { sprites } = useSprites();
 
   return (
     <>
-      {sprites.map((sprite) => (
+      {Object.entries(sprites).map(([key, sprite]) => (
         <Sprite
-          key={sprite.id}
-          states={sprite.states}
+          key={`sprite-${key}`}
+          assets={sprite.assets}
           size={sprite.size}
           position={sprite.position}
-          action={sprite.action}
+          state={sprite.state}
         />
       ))}
     </>
