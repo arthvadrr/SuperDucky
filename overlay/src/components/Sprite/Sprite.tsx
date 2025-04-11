@@ -35,15 +35,20 @@ export default function Sprite({
   speed = 1,
   size,
   position = { x: 0, y: 0 },
-  state = 'idle',
+  state = 'walk',
 }: SpriteProps) {
   const spriteRef = useRef<HTMLImageElement>(null);
   const [posX, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
+  const [isPaused, setIsPaused] = useState(false);
   const frameRef = useRef<number | null>(null);
 
   function animateWalk() {
     const sprite = spriteRef.current;
+
+    if (isPaused) {
+      return;
+    }
 
     if (sprite && sprite.parentElement) {
       const parentWidth = sprite.parentElement.clientWidth;
@@ -61,7 +66,7 @@ export default function Sprite({
   }
 
   useEffect(() => {
-    if (state === 'walk') {
+    if (state === 'walk' && !isPaused) {
       frameRef.current = requestAnimationFrame(animateWalk);
     }
     return () => {
@@ -69,7 +74,24 @@ export default function Sprite({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [state, posX, deltaX, speed]);
+  }, [state, posX, deltaX, speed, isPaused]);
+
+  useEffect(() => {
+    if (state !== 'walk') return;
+    let timerId: NodeJS.Timeout;
+    if (!isPaused) {
+      const pauseAfter = Math.random() * 4000 + 1000;
+      timerId = setTimeout(() => {
+        setIsPaused(true);
+      }, pauseAfter);
+    } else {
+      const resumeAfter = Math.random() * 4000 + 1000;
+      timerId = setTimeout(() => {
+        setIsPaused(false);
+      }, resumeAfter);
+    }
+    return () => clearTimeout(timerId);
+  }, [state, isPaused]);
 
   const styleVars: CSSProperties = {
     '--width': `auto`,
@@ -82,7 +104,7 @@ export default function Sprite({
   return (
     <img
       ref={spriteRef}
-      src={assets[state]}
+      src={state === 'walk' && isPaused ? assets.idle : assets[state]}
       className="sprite"
       style={styleVars}
     />
