@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import { MessageContext, MessageInstance } from './MessageContext';
+import { UserContext, type UserInstance } from '../context/UserContext';
 import type { SpriteInstance } from '../components/Sprite/SpriteController';
 
 export type Sprites = Record<string, SpriteInstance>;
@@ -18,7 +18,9 @@ export interface SpriteContextType {
 /**
  * Create the context
  */
-const SpriteContext = createContext<SpriteContextType | undefined>(undefined);
+export const SpriteContext = createContext<SpriteContextType | undefined>(
+  undefined,
+);
 
 /**
  * The context hook
@@ -33,40 +35,83 @@ export function useSprites() {
   return context;
 }
 
+const spritesInit: Sprites = {
+  arthvadrr: {
+    assets: {
+      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
+      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
+      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
+    },
+    state: 'walk',
+    size: { x: 100, y: 100 },
+    position: { x: 0, y: 0 },
+    color: '#FF0000',
+  },
+  anotherUser: {
+    assets: {
+      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
+      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
+      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
+    },
+    state: 'walk',
+    size: { x: 100, y: 100 },
+    position: { x: 0, y: 0 },
+    color: '#06FA09',
+  },
+  loser: {
+    assets: {
+      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
+      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
+      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
+    },
+    state: 'walk',
+    size: { x: 100, y: 100 },
+    position: { x: 0, y: 0 },
+    color: '#846401',
+  },
+  bigs: {
+    assets: {
+      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
+      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
+      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
+    },
+    state: 'walk',
+    size: { x: 100, y: 100 },
+    position: { x: 0, y: 0 },
+    color: '#FA67B0',
+  },
+};
+
 /**
  * The provider wrapper
  */
 export function SpriteProvider({ children }: { children: ReactNode }) {
-  const messages = useContext(MessageContext);
-  const [sprites, setSprites] = useState<Sprites>({
-    arthvadrr: {
-      assets: {
-        idle: '/images/super-ducky-transparent.webp',
-        walk: '/animations/ducky-walking.webp',
-        talk: '/animations/ducky-talking.webp',
-      },
-      state: 'walk',
-      size: { x: 264, y: 264 },
-      position: { x: 0, y: 0 },
-    },
-  });
+  const { users } = useContext(UserContext);
+  const [sprites, setSprites] = useState<Sprites>(spritesInit);
 
   useEffect(() => {
-    const updatedSprites = { ...sprites };
+    if (Array.isArray(users)) {
+      const updatedSprites = { ...sprites };
 
-    messages?.userMessages.forEach((message: MessageInstance) => {
-      const { username, command } = message;
+      users.forEach(({ username, color }: UserInstance) => {
+        if (!sprites?.[username]) {
+          updatedSprites[username] = {
+            assets: {
+              idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
+              walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
+              talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
+            },
+            state: 'walk',
+            size: { x: 100, y: 100 },
+            position: { x: 0, y: 0 },
+            color: color ?? '',
+          };
+        }
+      });
 
-      if (
-        updatedSprites?.[username] &&
-        (command === 'idle' || command === 'walk' || command === 'talk')
-      ) {
-        updatedSprites[username].state = command;
-      }
-    });
-
-    setSprites(updatedSprites);
-  }, [messages]);
+      setSprites(updatedSprites);
+    }
+  }, [users]);
 
   return (
     <SpriteContext.Provider value={{ sprites, setSprites }}>

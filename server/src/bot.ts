@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs';
+import { ApiClient } from '@twurple/api';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { getSocketServer } from './socket';
 import { Bot } from '@twurple/easy-bot';
@@ -81,35 +82,27 @@ export async function startDucky(): Promise<void> {
     channels: [process.env.VITE_TWITCH_CHANNEL ?? ''],
   });
 
-  bot.onMessage((ctx) => {
-    const messageText: string = ctx.text;
+  const apiClient = new ApiClient({ authProvider });
 
-    console.log('bot.onMessage!', messageText);
+  bot.onMessage(async (ctx) => {
+    const messageText: string = ctx.text;
+    const color = (await apiClient.chat.getColorForUser(ctx.userId)) ?? '';
+    let command = '';
 
     if (messageText.startsWith('!')) {
-      const [command, ...args] = messageText.slice(1).split(' ');
+      const [ctxCommand] = messageText.slice(1).split(' ');
 
-      if (command === 'walk' || command === 'move' || command === 'go') {
+      if (command === 'walk' || command === 'stop') {
         ctx.reply('quack! 🐥');
-
-        /**
-         * TODO set up args
-         */
-        getSocketServer().emit('message', {
-          command: 'walk',
-          username: ctx.userDisplayName,
-        });
-      }
-
-      if (command === 'idle' || command === 'stop') {
-        ctx.reply('quack! 🛑');
-
-        getSocketServer().emit('message', {
-          command: 'idle',
-          username: ctx.userDisplayName,
-        });
+        command = ctxCommand;
       }
     }
+
+    getSocketServer().emit('message', {
+      command,
+      color,
+      username: ctx.userDisplayName ?? '',
+    });
   });
 
   /**

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
+import { getHueRotateAmount } from '../../util/getHueRotateAmount';
 
 /**
  * Types and interfaces
@@ -17,6 +18,7 @@ export interface SpriteProps {
   assets: SpriteStateAssets;
   state?: SpriteStateKey;
   speed?: number;
+  color?: string;
   size: {
     x: number;
     y: number;
@@ -32,18 +34,24 @@ export interface SpriteProps {
  */
 export default function Sprite({
   assets,
+  color = '',
   speed = 1,
   size,
   position = { x: 0, y: 0 },
-  state = 'idle',
+  state = 'walk',
 }: SpriteProps) {
   const spriteRef = useRef<HTMLImageElement>(null);
   const [posX, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
+  const [isPaused, setIsPaused] = useState(false);
   const frameRef = useRef<number | null>(null);
 
   function animateWalk() {
     const sprite = spriteRef.current;
+
+    if (isPaused) {
+      return;
+    }
 
     if (sprite && sprite.parentElement) {
       const parentWidth = sprite.parentElement.clientWidth;
@@ -61,7 +69,7 @@ export default function Sprite({
   }
 
   useEffect(() => {
-    if (state === 'walk') {
+    if (state === 'walk' && !isPaused) {
       frameRef.current = requestAnimationFrame(animateWalk);
     }
     return () => {
@@ -69,20 +77,42 @@ export default function Sprite({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [state, posX, deltaX, speed]);
+  }, [state, posX, deltaX, speed, isPaused]);
+
+  useEffect(() => {
+    if (state !== 'walk') return;
+
+    let timerId: NodeJS.Timeout;
+
+    if (!isPaused) {
+      const pauseAfter = Math.random() * 4000 + 1000;
+      timerId = setTimeout(() => {
+        setIsPaused(true);
+      }, pauseAfter);
+    } else {
+      const resumeAfter = Math.random() * 4000 + 1000;
+      timerId = setTimeout(() => {
+        setIsPaused(false);
+      }, resumeAfter);
+    }
+
+    return () => clearTimeout(timerId);
+  }, [state, isPaused]);
 
   const styleVars: CSSProperties = {
-    '--width': `auto`,
+    '--width': `${size.x}px`,
     '--height': `${size.y}px`,
     '--left': `${posX}px`,
     '--bottom': `${position.y}px`,
+    '--color': color,
     '--transform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
+    '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
+    '--filter': `hue-rotate(${getHueRotateAmount(color)}deg)`,
   } as CSSProperties;
 
   return (
-    <img
+    <div
       ref={spriteRef}
-      src={assets[state]}
       className="sprite"
       style={styleVars}
     />
