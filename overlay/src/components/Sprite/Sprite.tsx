@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
+import { getHueRotateAmount } from '../../util/getHueRotateAmount';
 
 /**
  * Types and interfaces
@@ -17,6 +18,7 @@ export interface SpriteProps {
   assets: SpriteStateAssets;
   state?: SpriteStateKey;
   speed?: number;
+  color?: string;
   size: {
     x: number;
     y: number;
@@ -32,6 +34,7 @@ export interface SpriteProps {
  */
 export default function Sprite({
   assets,
+  color = '',
   speed = 1,
   size,
   position = { x: 0, y: 0 },
@@ -78,7 +81,9 @@ export default function Sprite({
 
   useEffect(() => {
     if (state !== 'walk') return;
+
     let timerId: NodeJS.Timeout;
+
     if (!isPaused) {
       const pauseAfter = Math.random() * 4000 + 1000;
       timerId = setTimeout(() => {
@@ -90,21 +95,24 @@ export default function Sprite({
         setIsPaused(false);
       }, resumeAfter);
     }
+
     return () => clearTimeout(timerId);
   }, [state, isPaused]);
 
   const styleVars: CSSProperties = {
-    '--width': `auto`,
+    '--width': `${size.x}px`,
     '--height': `${size.y}px`,
     '--left': `${posX}px`,
     '--bottom': `${position.y}px`,
+    '--color': color,
     '--transform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
+    '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
+    '--filter': `hue-rotate(${getHueRotateAmount(color)}deg)`,
   } as CSSProperties;
 
   return (
-    <img
+    <div
       ref={spriteRef}
-      src={state === 'walk' && isPaused ? assets.idle : assets[state]}
       className="sprite"
       style={styleVars}
     />

@@ -7,5 +7,21 @@
   left: var(--left);
   top: var(--top);
   transform: var(--transform);
-  background-image: var(--bgImage);
+  color: var(--color);
+  background-image: var(--backgroundImage);
+  filter: var(--filter);
+
+  &:after {
+    content: '';
+    top: 0;
+    left: 0;
+    display: block;
+    height: 91%;
+    width: 100%;
+    background-image: radial-gradient(transparent, currentColor);
+    mask-image: var(--backgroundImage);
+    mask-repeat: no-repeat;
+    mix-blend-mode: normal;
+    opacity: 0.5;
+  }
 }

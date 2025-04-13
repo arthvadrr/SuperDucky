@@ -6,6 +6,7 @@ export interface SpriteInstance {
   state: 'idle' | 'walk' | 'talk';
   size: { x: number; y: number };
   position: { x: number; y: number };
+  color: string;
 }
 
 export default function SpriteController() {
@@ -20,6 +21,7 @@ export default function SpriteController() {
           size={sprite.size}
           position={sprite.position}
           state={sprite.state}
+          color={sprite.color}
         />
       ))}
     </>
