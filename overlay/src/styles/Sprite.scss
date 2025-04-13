@@ -1,27 +1,30 @@
-.sprite {
+.sprite-container {
   position: absolute;
-  background-size: contain;
-  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
   width: var(--width);
   height: var(--height);
   left: var(--left);
   top: var(--top);
   transform: var(--transform);
   color: var(--color);
-  background-image: var(--backgroundImage);
-  filter: var(--filter);
 
-  &:after {
-    content: '';
+  .sprite {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: var(--backgroundImage);
+    background-position: center;
+    width: var(--width);
+    height: var(--height);
+    filter: var(--filter);
+  }
+
+  .username {
+    position: absolute;
     top: 0;
-    left: 0;
-    display: block;
-    height: 91%;
-    width: 100%;
-    background-image: radial-gradient(transparent, currentColor);
-    mask-image: var(--backgroundImage);
-    mask-repeat: no-repeat;
-    mix-blend-mode: normal;
-    opacity: 0.5;
+    padding: 4px 8px;
+    color: var(--color);
+    background-color: #18181a;
+    transform: var(--usernameTransform);
   }
 }

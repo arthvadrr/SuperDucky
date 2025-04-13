@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
@@ -19,10 +19,8 @@ export interface SpriteProps {
   state?: SpriteStateKey;
   speed?: number;
   color?: string;
-  size: {
-    x: number;
-    y: number;
-  };
+  username: string;
+  size: number;
   position?: {
     x: number;
     y: number;
@@ -39,12 +37,15 @@ export default function Sprite({
   size,
   position = { x: 0, y: 0 },
   state = 'walk',
+  username = '',
 }: SpriteProps) {
   const spriteRef = useRef<HTMLImageElement>(null);
+  const frameRef = useRef<number | null>(null);
   const [posX, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
-  const frameRef = useRef<number | null>(null);
+
+  const rotatedHue = useCallback(() => getHueRotateAmount(color), [color]);
 
   function animateWalk() {
     const sprite = spriteRef.current;
@@ -99,22 +100,38 @@ export default function Sprite({
     return () => clearTimeout(timerId);
   }, [state, isPaused]);
 
-  const styleVars: CSSProperties = {
-    '--width': `${size.x}px`,
-    '--height': `${size.y}px`,
+  const spriteStyles: CSSProperties = {
+    '--width': `${size}px`,
+    '--height': `${size}px`,
     '--left': `${posX}px`,
     '--bottom': `${position.y}px`,
     '--color': color,
     '--transform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
     '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
-    '--filter': `hue-rotate(${getHueRotateAmount(color)}deg)`,
+    '--filter': `hue-rotate(${rotatedHue()}deg)`,
+  } as CSSProperties;
+
+  const usernameStyles: CSSProperties = {
+    '--usernameTransform':
+      'translate(0, -130%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
   } as CSSProperties;
 
   return (
     <div
       ref={spriteRef}
-      className="sprite"
-      style={styleVars}
-    />
+      className="sprite-container"
+      style={spriteStyles}
+    >
+      <div
+        className="sprite"
+        style={usernameStyles}
+      ></div>
+      <div
+        className="username"
+        style={usernameStyles}
+      >
+        {username}
+      </div>
+    </div>
   );
 }

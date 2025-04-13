@@ -1,16 +1,18 @@
+import { useContext } from 'react';
 import Sprite, { SpriteStateAssets } from './Sprite';
-import { useSprites } from '../../context/SpriteContext';
+import { SpriteContext } from '../../context/SpriteContext';
 
 export interface SpriteInstance {
   assets: SpriteStateAssets;
   state: 'idle' | 'walk' | 'talk';
-  size: { x: number; y: number };
+  size: number;
   position: { x: number; y: number };
+  speed: number;
   color: string;
 }
 
 export default function SpriteController() {
-  const { sprites } = useSprites();
+  const { sprites } = useContext(SpriteContext);
 
   return (
     <>
@@ -20,8 +22,10 @@ export default function SpriteController() {
           assets={sprite.assets}
           size={sprite.size}
           position={sprite.position}
+          speed={sprite.speed}
           state={sprite.state}
           color={sprite.color}
+          username={String(key)}
         />
       ))}
     </>
