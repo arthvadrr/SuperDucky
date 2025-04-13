@@ -1,5 +1,5 @@
 <p>
-  <img src="overlay/public/animations/ducky-walking.webp" alt="SuperDucky" width="200" />
+  <img src="overlay/public/sprites/baby-ducky/baby-ducky-walk.webp" alt="SuperDucky" width="100" />
 </p>
 
 SuperDucky is my Twitch bot!
