@@ -4,6 +4,12 @@
 
 SuperDucky is my Twitch bot!
 
+## TODO
+
+- Currently working on card
+- Chat bubbles
+-
+
 ## Project Structure
 
 Contains the backend built with Node.js, Express, and Socket.IO, and the client-side application built with React and TypeScript, meant to be used as an OBS overlay.

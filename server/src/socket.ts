@@ -15,14 +15,20 @@ export function initializeSocketServer(httpServer: HTTPServer): void {
   socketServer = new Server(httpServer, {
     cors: {
       origin: `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_FRONTEND_PORT ?? '3000'}`,
+      methods: ['GET', 'POST'],
+      credentials: true,
     },
   });
 
   socketServer.on('connection', (socket) => {
     console.log('🔌 Client connected:');
 
-    socket.on('disconnect', () => {
-      console.log('❌ Client disconnected:');
+    socket.on('manual-disconnect', (reason: string) => {
+      console.log(`👋 Client manually disconnected: ${reason}`);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log(`❌ Client disconnected: ${reason}`);
     });
   });
 }

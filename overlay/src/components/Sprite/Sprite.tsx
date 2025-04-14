@@ -33,7 +33,6 @@ export interface SpriteProps {
 export default function Sprite({
   assets,
   color = '',
-  speed = 1,
   size,
   position = { x: 0, y: 0 },
   state = 'walk',
@@ -44,8 +43,8 @@ export default function Sprite({
   const [posX, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
-
   const rotatedHue = useCallback(() => getHueRotateAmount(color), [color]);
+  const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
 
   function animateWalk() {
     const sprite = spriteRef.current;
@@ -57,7 +56,7 @@ export default function Sprite({
     if (sprite && sprite.parentElement) {
       const parentWidth = sprite.parentElement.clientWidth;
       const width = sprite.clientWidth;
-      const newX = posX + deltaX * speed;
+      const newX = posX + deltaX * speedRef.current;
 
       if (newX <= 0 || newX + width >= parentWidth) {
         setDeltaX((prev) => -prev);
@@ -78,7 +77,7 @@ export default function Sprite({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [state, posX, deltaX, speed, isPaused]);
+  }, [state, posX, deltaX, isPaused]);
 
   useEffect(() => {
     if (state !== 'walk') return;
@@ -86,13 +85,15 @@ export default function Sprite({
     let timerId: NodeJS.Timeout;
 
     if (!isPaused) {
-      const pauseAfter = Math.random() * 4000 + 1000;
+      const pauseAfter = Math.random() * 20000 + 1000;
       timerId = setTimeout(() => {
         setIsPaused(true);
       }, pauseAfter);
     } else {
-      const resumeAfter = Math.random() * 4000 + 1000;
+      const resumeAfter = Math.random() * 20000 + 1000;
       timerId = setTimeout(() => {
+        setDeltaX(Math.random() > 0.5 ? 1 : -1);
+        speedRef.current = Math.random() * (3 - 0.5) + 0.5;
         setIsPaused(false);
       }, resumeAfter);
     }
