@@ -6,9 +6,10 @@ SuperDucky is my Twitch bot!
 
 ## TODO
 
-- Currently working on card
 - Chat bubbles
--
+- Handle message profanity
+- Handle user gets banned
+- Handle user timeout (fun ideas...)
 
 ## Project Structure
 
