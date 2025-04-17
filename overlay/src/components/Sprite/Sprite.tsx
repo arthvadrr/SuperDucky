@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
@@ -45,7 +45,7 @@ function Sprite({
   const frameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const interval = 1000 / 30; // 30fps throttle
-  const rotatedHue = useCallback(() => getHueRotateAmount(color), [color]);
+  const hueRotateValue = useMemo(() => getHueRotateAmount(color), []);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
 
   function animateWalk(time: number) {
@@ -65,6 +65,11 @@ function Sprite({
       const width = spriteRef.current?.clientWidth ?? 0;
       setPosX((prevX) => {
         const nextX = prevX + deltaX * speedRef.current;
+        const transformValue = deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+        if (spriteRef.current) {
+          spriteRef.current.style.setProperty('--left', `${nextX}px`);
+          spriteRef.current.style.setProperty('--transform', transformValue);
+        }
         if (nextX <= 0 || nextX + width >= parentWidth) {
           setDeltaX((d) => -d);
           return prevX;
@@ -110,21 +115,25 @@ function Sprite({
     return () => clearTimeout(timerId);
   }, [state, isPaused]);
 
-  const spriteStyles: CSSProperties = {
-    '--width': `${size}px`,
-    '--height': `${size}px`,
-    '--left': `${posX}px`,
-    '--bottom': `${position.y}px`,
-    '--color': color,
-    '--transform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
-    '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
-    '--filter': `hue-rotate(${rotatedHue()}deg)`,
-  } as CSSProperties;
+  const spriteStyles = useMemo(
+    (): CSSProperties => ({
+      '--width': `${size}px`,
+      '--height': `${size}px`,
+      '--bottom': `${position.y}px`,
+      '--color': color,
+      '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
+      '--filter': `hue-rotate(${hueRotateValue}deg)`,
+    }),
+    [size, position.y, state, isPaused, hueRotateValue],
+  );
 
-  const usernameStyles: CSSProperties = {
-    '--usernameTransform':
-      'translate(0, -130%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
-  } as CSSProperties;
+  const usernameStyles = useMemo(
+    (): CSSProperties => ({
+      '--usernameTransform':
+        'translate(0, -130%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
+    }),
+    [deltaX],
+  );
 
   return (
     <div
