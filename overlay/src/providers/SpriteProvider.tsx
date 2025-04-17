@@ -49,12 +49,6 @@ function generateSpritesInit(
   return result;
 }
 
-const spritesInit = generateSpritesInit(20, {
-  idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-  walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-  talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-});
-
 /**
  * The provider wrapper
  */
@@ -70,7 +64,9 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const [sprites, setSprites] = useState<Sprites>(spritesInit);
+  const [sprites, setSprites] = useState<Sprites>(() =>
+    generateSpritesInit(20, spriteAssets),
+  );
 
   useEffect(() => {
     if (!Array.isArray(users)) return;
