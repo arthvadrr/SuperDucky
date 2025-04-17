@@ -1,4 +1,11 @@
-import { useState, ReactNode, useEffect, useCallback, useContext } from 'react';
+import {
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+  useContext,
+  useMemo,
+} from 'react';
 import { MessageContext } from '../context/MessageContext';
 import { UserContext, type UserInstance } from '../context/UserContext';
 import type { MessageInstance } from '../context/MessageContext';
@@ -48,8 +55,13 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     };
   }, [onReceiveMessage]);
 
+  const messageContextValue = useMemo(
+    () => ({ userMessages, addMessage }),
+    [userMessages, addMessage],
+  );
+
   return (
-    <MessageContext.Provider value={{ userMessages, addMessage }}>
+    <MessageContext.Provider value={messageContextValue}>
       {children}
     </MessageContext.Provider>
   );

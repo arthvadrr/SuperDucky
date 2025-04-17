@@ -98,8 +98,12 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
     });
   }, [users, spriteAssets]);
 
+  const spriteContextValue = useMemo(
+    () => ({ sprites, setSprites }),
+    [sprites],
+  );
   return (
-    <SpriteContext.Provider value={{ sprites, setSprites }}>
+    <SpriteContext.Provider value={spriteContextValue}>
       {children}
     </SpriteContext.Provider>
   );
