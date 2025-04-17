@@ -38,34 +38,30 @@ export default function Sprite({
   state = 'walk',
   username = '',
 }: SpriteProps) {
-  const spriteRef = useRef<HTMLImageElement>(null);
-  const frameRef = useRef<number | null>(null);
   const [posX, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
+  const spriteRef = useRef<HTMLImageElement>(null);
+  const frameRef = useRef<number | null>(null);
   const rotatedHue = useCallback(() => getHueRotateAmount(color), [color]);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
 
   function animateWalk() {
-    const sprite = spriteRef.current;
-
     if (isPaused) {
       return;
     }
 
-    if (sprite && sprite.parentElement) {
-      const parentWidth = sprite.parentElement.clientWidth;
-      const width = sprite.clientWidth;
-      const newX = posX + deltaX * speedRef.current;
+    const parentWidth = spriteRef.current?.parentElement?.clientWidth ?? 0;
+    const width = spriteRef.current?.clientWidth ?? 0;
+    const newX = posX + deltaX * speedRef.current;
 
-      if (newX <= 0 || newX + width >= parentWidth) {
-        setDeltaX((prev) => -prev);
-      } else {
-        setPosX(newX);
-      }
-
-      frameRef.current = requestAnimationFrame(animateWalk);
+    if (newX <= 0 || newX + width >= parentWidth) {
+      setDeltaX(-deltaX);
+    } else {
+      setPosX(newX);
     }
+
+    frameRef.current = requestAnimationFrame(animateWalk);
   }
 
   useEffect(() => {

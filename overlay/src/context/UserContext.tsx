@@ -6,6 +6,7 @@ import { createContext, SetStateAction, Dispatch } from 'react';
 export interface UserInstance {
   username: string;
   color?: string;
+  message?: string;
 }
 
 export interface UserContext {

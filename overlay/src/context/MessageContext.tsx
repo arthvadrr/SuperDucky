@@ -17,6 +17,7 @@ export interface MessageContextType {
 /**
  * Create the context
  */
-export const MessageContext = createContext<MessageContextType | undefined>(
-  undefined,
-);
+export const MessageContext = createContext<MessageContextType>({
+  userMessages: [],
+  addMessage: () => {},
+});

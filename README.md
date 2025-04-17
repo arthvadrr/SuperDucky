@@ -10,6 +10,7 @@ SuperDucky is my Twitch bot!
 - Handle message profanity
 - Handle user gets banned
 - Handle user timeout (fun ideas...)
+- Hatch and grow feature
 
 ## Project Structure
 
