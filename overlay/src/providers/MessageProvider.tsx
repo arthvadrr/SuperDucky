@@ -18,42 +18,34 @@ export function MessageProvider({ children }: { children: ReactNode }) {
   const { users, setUsers } = useContext(UserContext);
   const [userMessages, setUserMessages] = useState<MessageInstance[]>([]);
 
-  const addMessage = useCallback((msg: MessageInstance) => {
-    const { username, color } = msg;
+  const addMessage = useCallback(
+    (msg: MessageInstance) => {
+      const { username, color } = msg;
 
-    if (
-      username &&
-      !users.some((user: UserInstance) => user.username === username)
-    ) {
-      setUsers((prev) => [...prev, { username, color }]);
-    }
-
-    setUserMessages((prev) => {
-      if (prev.length >= 30) {
-        return [...prev.slice(1), msg];
+      if (
+        username &&
+        !users.some((user: UserInstance) => user.username === username)
+      ) {
+        setUsers((prev) => [...prev, { username, color }]);
       }
-      return [...prev, msg];
-    });
-  }, []);
 
-  /**
-   * Memoize our function reference for cleanup
-   */
-  const onReceiveMessage = useCallback(
-    (message: MessageInstance) => addMessage(message),
-    [addMessage],
+      setUserMessages((prev) => {
+        if (prev.length >= 30) {
+          return [...prev.slice(1), msg];
+        }
+        return [...prev, msg];
+      });
+    },
+    [users],
   );
 
-  /**
-   * Listen for messages
-   */
   useEffect(() => {
-    socket.on('message', onReceiveMessage);
+    socket.on('message', addMessage);
 
     return () => {
-      socket.off('message', onReceiveMessage);
+      socket.off('message', addMessage);
     };
-  }, [onReceiveMessage]);
+  }, [addMessage]);
 
   const messageContextValue = useMemo(
     () => ({ userMessages, addMessage }),

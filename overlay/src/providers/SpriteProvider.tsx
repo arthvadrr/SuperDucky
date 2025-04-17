@@ -65,7 +65,7 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
   );
 
   const [sprites, setSprites] = useState<Sprites>(() =>
-    generateSpritesInit(20, spriteAssets),
+    generateSpritesInit(5, spriteAssets),
   );
 
   useEffect(() => {

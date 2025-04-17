@@ -1,7 +1,16 @@
-import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
+import { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { getHueRotateAmount } from '../../util/getHueRotateAmount';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
-import { getHueRotateAmount } from '../../util/getHueRotateAmount';
+
+/**
+ * Extend CSSProperties to include CSS custom properties (variables)
+ */
+type CSSVarProperties = {
+  [key: `--${string}`]: string;
+};
+
+type CSSPropertiesWithVars = CSSProperties & CSSVarProperties;
 
 /**
  * Types and interfaces
@@ -38,8 +47,12 @@ function Sprite({
   state = 'walk',
   username = '',
 }: SpriteProps) {
-  const [posX, setPosX] = useState(position.x);
+  const [_, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
+  const deltaXRef = useRef(deltaX);
+  useEffect(() => {
+    deltaXRef.current = deltaX;
+  }, [deltaX]);
   const [isPaused, setIsPaused] = useState(false);
   const spriteRef = useRef<HTMLImageElement>(null);
   const frameRef = useRef<number | null>(null);
@@ -59,22 +72,49 @@ function Sprite({
     }
     const elapsed = time - lastTimeRef.current;
     if (elapsed >= interval) {
-      lastTimeRef.current = time - (elapsed % interval);
+      lastTimeRef.current += interval;
 
-      const parentWidth = spriteRef.current?.parentElement?.clientWidth ?? 0;
-      const width = spriteRef.current?.clientWidth ?? 0;
       setPosX((prevX) => {
-        const nextX = prevX + deltaX * speedRef.current;
-        const transformValue = deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+        const dir = deltaXRef.current;
+        const nextX = prevX + dir * speedRef.current;
+        const parentWidth = spriteRef.current?.parentElement?.clientWidth ?? 0;
+        const width = spriteRef.current?.clientWidth ?? 0;
+        let clampedX = nextX;
+        let newDir = dir;
+
+        /**
+         * Collison check
+         */
+        if (nextX <= 0) {
+          clampedX = 0;
+          newDir = -dir;
+        } else if (nextX + width >= parentWidth) {
+          clampedX = parentWidth - width;
+          newDir = -dir;
+        }
+
+        /**
+         * Change direction if collided
+         */
+        if (newDir !== dir) {
+          setDeltaX(newDir);
+          deltaXRef.current = newDir;
+        }
+
+        /**
+         * CSS transform determines which direction the sprite is facing
+         */
+        const transformValue = newDir < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+
+        /**
+         * Apply the animation styles
+         */
         if (spriteRef.current) {
-          spriteRef.current.style.setProperty('--left', `${nextX}px`);
+          spriteRef.current.style.setProperty('--left', `${clampedX}px`);
           spriteRef.current.style.setProperty('--transform', transformValue);
         }
-        if (nextX <= 0 || nextX + width >= parentWidth) {
-          setDeltaX((d) => -d);
-          return prevX;
-        }
-        return nextX;
+
+        return clampedX;
       });
     }
 
@@ -115,8 +155,8 @@ function Sprite({
     return () => clearTimeout(timerId);
   }, [state, isPaused]);
 
-  const spriteStyles = useMemo(
-    (): CSSProperties => ({
+  const spriteStyles = useMemo<CSSPropertiesWithVars>(
+    (): CSSPropertiesWithVars => ({
       '--width': `${size}px`,
       '--height': `${size}px`,
       '--bottom': `${position.y}px`,
@@ -127,8 +167,8 @@ function Sprite({
     [size, position.y, state, isPaused, hueRotateValue],
   );
 
-  const usernameStyles = useMemo(
-    (): CSSProperties => ({
+  const usernameStyles = useMemo<CSSPropertiesWithVars>(
+    (): CSSPropertiesWithVars => ({
       '--usernameTransform':
         'translate(0, -130%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
     }),
