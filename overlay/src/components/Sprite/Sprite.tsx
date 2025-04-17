@@ -28,6 +28,7 @@ export interface SpriteProps {
   state?: SpriteStateKey;
   speed?: number;
   color?: string;
+  message: string;
   username: string;
   size: number;
   position?: {
@@ -47,7 +48,7 @@ function Sprite({
   state = 'walk',
   username = '',
 }: SpriteProps) {
-  const [_, setPosX] = useState(position.x);
+  const [, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
   const deltaXRef = useRef(deltaX);
   useEffect(() => {

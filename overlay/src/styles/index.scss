@@ -1,6 +1,8 @@
 @font-face {
   font-family: 'MonaspaceKrypton';
-  src: url('fonts/MonaspaceKrypton-Regular.ttf') format('truetype');
+  src:
+    url('/fonts/MonaspaceKrypton-Regular.ttf') format('truetype'),
+    url('/assets/fonts/MonaspaceKrypton-Regular.ttf') format('truetype');
 }
 
 :root {
