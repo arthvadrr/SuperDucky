@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, memo } from 'react';
 import { SpriteContext } from '../../context/SpriteContext';
 import Sprite from './Sprite';
 import type { SpriteStateAssets } from './Sprite';
@@ -13,7 +13,7 @@ export interface SpriteInstance {
   color: string;
 }
 
-export default function SpriteController() {
+function SpriteController() {
   const { sprites } = useContext(SpriteContext);
 
   return (
@@ -36,3 +36,4 @@ export default function SpriteController() {
     </>
   );
 }
+export default memo(SpriteController);

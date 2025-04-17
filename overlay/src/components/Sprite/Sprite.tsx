@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
@@ -30,7 +30,7 @@ export interface SpriteProps {
 /**
  * FC Sprite
  */
-export default function Sprite({
+function Sprite({
   assets,
   color = '',
   size,
@@ -43,22 +43,34 @@ export default function Sprite({
   const [isPaused, setIsPaused] = useState(false);
   const spriteRef = useRef<HTMLImageElement>(null);
   const frameRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+  const interval = 1000 / 30; // 30fps throttle
   const rotatedHue = useCallback(() => getHueRotateAmount(color), [color]);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
 
-  function animateWalk() {
+  function animateWalk(time: number) {
     if (isPaused) {
+      lastTimeRef.current = 0;
       return;
     }
 
-    const parentWidth = spriteRef.current?.parentElement?.clientWidth ?? 0;
-    const width = spriteRef.current?.clientWidth ?? 0;
-    const newX = posX + deltaX * speedRef.current;
+    if (!lastTimeRef.current) {
+      lastTimeRef.current = time;
+    }
+    const elapsed = time - lastTimeRef.current;
+    if (elapsed >= interval) {
+      lastTimeRef.current = time - (elapsed % interval);
 
-    if (newX <= 0 || newX + width >= parentWidth) {
-      setDeltaX(-deltaX);
-    } else {
-      setPosX(newX);
+      const parentWidth = spriteRef.current?.parentElement?.clientWidth ?? 0;
+      const width = spriteRef.current?.clientWidth ?? 0;
+      setPosX((prevX) => {
+        const nextX = prevX + deltaX * speedRef.current;
+        if (nextX <= 0 || nextX + width >= parentWidth) {
+          setDeltaX((d) => -d);
+          return prevX;
+        }
+        return nextX;
+      });
     }
 
     frameRef.current = requestAnimationFrame(animateWalk);
@@ -66,6 +78,7 @@ export default function Sprite({
 
   useEffect(() => {
     if (state === 'walk' && !isPaused) {
+      lastTimeRef.current = 0;
       frameRef.current = requestAnimationFrame(animateWalk);
     }
     return () => {
@@ -73,7 +86,7 @@ export default function Sprite({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [state, posX, deltaX, isPaused]);
+  }, [state, isPaused]);
 
   useEffect(() => {
     if (state !== 'walk') return;
@@ -132,3 +145,4 @@ export default function Sprite({
     </div>
   );
 }
+export default memo(Sprite);
