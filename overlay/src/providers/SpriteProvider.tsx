@@ -1,7 +1,11 @@
 import { useContext, useEffect, useState, ReactNode, useMemo } from 'react';
 import { SpriteContext } from '../context/SpriteContext';
-import { UserContext, type UserInstance } from '../context/UserContext';
+import { UserContext } from '../context/UserContext';
 import { getRandomHexColor } from '../util/getRandomHexColor';
+import {
+  MessageContext,
+  type MessageContextType,
+} from '../context/MessageContext';
 import type { SpriteInstance } from '../components/Sprite/SpriteController';
 
 export type Sprites = Record<string, SpriteInstance>;
@@ -33,7 +37,7 @@ function generateSpriteInstance(spriteAssets: {
     speed: Math.random() * (2 - 0.5) + 0.5,
     position: { x: 0, y: 0 },
     color: getRandomHexColor(),
-    message: '',
+    messageText: '',
   };
 }
 
@@ -50,10 +54,13 @@ function generateSpritesInit(
 }
 
 /**
- * The provider wrapper
+ * 🦆 Rise duckies 🦆
  */
 export function SpriteProvider({ children }: { children: ReactNode }) {
-  const { users } = useContext(UserContext);
+  const { userMessages } = useContext<MessageContextType>(MessageContext);
+  const { users } = useContext<UserContext>(UserContext);
+
+  console.log('ushouldseeusermsgs', userMessages);
 
   const spriteAssets = useMemo(
     () => ({
@@ -65,18 +72,22 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
   );
 
   const [sprites, setSprites] = useState<Sprites>(() =>
-    generateSpritesInit(5, spriteAssets),
+    /**
+     * Assign fake users
+     */
+    generateSpritesInit(0, spriteAssets),
   );
 
   useEffect(() => {
-    if (!Array.isArray(users)) return;
-
     setSprites((prevSprites) => {
-      let needsUpdate = false;
       const updated = { ...prevSprites };
 
-      users.forEach(({ username, color, message }: UserInstance) => {
-        if (!updated[username]) {
+      for (const username in users) {
+        const { color, messageText } = users[username];
+
+        if (updated?.[username]) {
+          updated[username].messageText = messageText ?? '';
+        } else {
           updated[username] = {
             assets: spriteAssets,
             state: 'walk',
@@ -84,20 +95,22 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
             speed: Math.random() * (2 - 0.5) + 0.5,
             position: { x: 0, y: 0 },
             color: color ?? '',
-            message: message ?? '',
+            messageText: messageText ?? '',
           };
-          needsUpdate = true;
         }
-      });
+      }
 
-      return needsUpdate ? updated : prevSprites;
+      return updated;
     });
-  }, [users, spriteAssets]);
+  }, [users, spriteAssets, userMessages.length]);
+
+  console.log('theusers', users);
 
   const spriteContextValue = useMemo(
     () => ({ sprites, setSprites }),
     [sprites],
   );
+
   return (
     <SpriteContext.Provider value={spriteContextValue}>
       {children}

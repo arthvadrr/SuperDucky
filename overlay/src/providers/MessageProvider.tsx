@@ -1,43 +1,38 @@
-import {
-  useState,
-  ReactNode,
-  useEffect,
-  useCallback,
-  useContext,
-  useMemo,
-} from 'react';
+import { useState, ReactNode, useEffect, useContext, useMemo } from 'react';
 import { MessageContext } from '../context/MessageContext';
-import { UserContext, type UserInstance } from '../context/UserContext';
-import type { MessageInstance } from '../context/MessageContext';
+import { UserContext } from '../context/UserContext';
 import socket from '../socket';
+import type { MessageInstance } from '../context/MessageContext';
 
 /**
  * Create the provider
  */
 export function MessageProvider({ children }: { children: ReactNode }) {
-  const { users, setUsers } = useContext(UserContext);
+  const { users, setUsers } = useContext<UserContext>(UserContext);
   const [userMessages, setUserMessages] = useState<MessageInstance[]>([]);
 
-  const addMessage = useCallback(
-    (msg: MessageInstance) => {
-      const { username, color } = msg;
+  /**
+   * TODO fix the useCallback
+   */
+  const addMessage = (msg: MessageInstance) => {
+    const { username, color, messageText } = msg;
+    const usersCopy = { ...users };
 
-      if (
-        username &&
-        !users.some((user: UserInstance) => user.username === username)
-      ) {
-        setUsers((prev) => [...prev, { username, color }]);
+    usersCopy[username] = {
+      username,
+      color,
+      messageText,
+    };
+
+    setUsers(usersCopy);
+
+    setUserMessages((prev) => {
+      if (prev.length >= 30) {
+        return [...prev.slice(1), msg];
       }
-
-      setUserMessages((prev) => {
-        if (prev.length >= 30) {
-          return [...prev.slice(1), msg];
-        }
-        return [...prev, msg];
-      });
-    },
-    [users],
-  );
+      return [...prev, msg];
+    });
+  };
 
   useEffect(() => {
     socket.on('message', addMessage);

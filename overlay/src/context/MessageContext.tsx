@@ -6,6 +6,7 @@ import { createContext } from 'react';
 export interface MessageInstance {
   username: string;
   command: string;
+  messageText: string;
   color: string;
 }
 
