@@ -60,8 +60,6 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
   const { userMessages } = useContext<MessageContextType>(MessageContext);
   const { users } = useContext<UserContext>(UserContext);
 
-  console.log('ushouldseeusermsgs', userMessages);
-
   const spriteAssets = useMemo(
     () => ({
       idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
@@ -103,8 +101,6 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
       return updated;
     });
   }, [users, spriteAssets, userMessages.length]);
-
-  console.log('theusers', users);
 
   const spriteContextValue = useMemo(
     () => ({ sprites, setSprites }),

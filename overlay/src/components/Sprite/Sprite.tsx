@@ -57,29 +57,34 @@ function Sprite({
     deltaXRef.current = deltaX;
   }, [deltaX]);
 
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isShowingMessage, setIsShowingMessage] = useState<boolean>(true);
   const spriteRef = useRef<HTMLImageElement>(null);
   const frameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
-  const interval = 30;
+  const interval = 33;
   const hueRotateValue = useMemo(() => getHueRotateAmount(color), []);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
-  const currentMessageText = useRef(messageText);
-  const messageFrameCounter = useRef<number>(0);
+  const messageTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Handle the chat bubble
    */
-  if (messageText !== currentMessageText.current) {
-    currentMessageText.current = messageText;
-    messageFrameCounter.current = 0;
-  }
+  useEffect(() => {
+    const readingLength = messageText.split(' ').length * 500 + 5000;
 
-  if (messageFrameCounter.current < 165) {
-    messageFrameCounter.current = messageFrameCounter.current + 1;
-  }
+    setIsShowingMessage(true);
 
-  const isShowingMessage = messageFrameCounter.current < 165;
+    if (messageTimeout.current) {
+      clearTimeout(messageTimeout.current);
+      messageTimeout.current = null;
+    }
+
+    messageTimeout.current = setTimeout(() => {
+      setIsShowingMessage(false);
+      messageTimeout.current = null;
+    }, readingLength);
+  }, [messageText]);
 
   function animateWalk(time: number) {
     if (isPaused) {
@@ -178,13 +183,25 @@ function Sprite({
     return () => clearTimeout(timerId);
   }, [state, isPaused]);
 
+  function getBackgroundImage() {
+    let result = '';
+
+    if (state === 'walk' && isPaused) {
+      result = assets.idle;
+    } else {
+      result = assets[state];
+    }
+
+    return result;
+  }
+
   const spriteStyles = useMemo<CSSPropertiesWithVars>(
     (): CSSPropertiesWithVars => ({
       '--width': `${size}px`,
       '--height': `${size}px`,
       '--bottom': `${position.y}px`,
       '--color': color,
-      '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
+      '--backgroundImage': `url(${getBackgroundImage()})`,
       '--filter': `hue-rotate(${hueRotateValue}deg)`,
     }),
     [size, position.y, state, isPaused, hueRotateValue],
@@ -198,13 +215,10 @@ function Sprite({
     [deltaX],
   );
 
-  console.log(messageFrameCounter.current);
-
   const messageTextStyles = useMemo<CSSPropertiesWithVars>(
     (): CSSPropertiesWithVars => ({
       '--messageTextTransform':
         'translate(-50%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
-      '--opacity': isShowingMessage ? '1' : '0',
     }),
     [deltaX, isShowingMessage],
   );
@@ -226,10 +240,10 @@ function Sprite({
         {username}
         <div className="message-text-container">
           <div
-            className="message-text"
+            className={`message-text ${isShowingMessage ? 'visible' : 'hidden'}`}
             style={messageTextStyles}
           >
-            {currentMessageText.current}
+            {messageText}
           </div>
         </div>
       </div>

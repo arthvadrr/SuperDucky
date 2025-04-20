@@ -33,16 +33,36 @@
     flex-direction: column;
     justify-content: end;
     position: absolute;
-    top: -660px;
+    top: -610px;
+    width: 250%;
     height: 600px;
     transform: var(--messageTextTransform);
 
     .message-text {
+      width: fit-content;
       bottom: 0;
-      background-color: #ffffff;
-      border-radius: 10px 10px 0 10px;
-      padding: 10px;
-      opacity: var(--opacity);
+      color: var(--color);
+      background-color: #fff;
+      box-shadow: 5px 5px 1px #000;
+      border: 1px solid #000;
+      border-radius: 20px 20px 20px 0;
+      padding: 10px 20px;
+      transition: opacity 200ms ease-in;
+      transform-origin: bottom left;
+
+      &.visible {
+        transform: translateY(0);
+        opacity: 1;
+        transition:
+          transform 600ms cubic-bezier(0.68, -0.55, 0.27, 1.55),
+          opacity 300ms ease-in;
+      }
+
+      &.hidden {
+        opacity: 0;
+        transform: translateY(50px) rotate(45deg) scale(0.1);
+        transition: none;
+      }
     }
   }
 }
