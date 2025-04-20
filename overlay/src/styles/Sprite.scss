@@ -27,4 +27,22 @@
     background-color: #18181a;
     transform: var(--usernameTransform);
   }
+
+  .message-text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    position: absolute;
+    top: -660px;
+    height: 600px;
+    transform: var(--messageTextTransform);
+
+    .message-text {
+      bottom: 0;
+      background-color: #ffffff;
+      border-radius: 10px 10px 0 10px;
+      padding: 10px;
+      opacity: var(--opacity);
+    }
+  }
 }

@@ -11,6 +11,7 @@ SuperDucky is my Twitch bot!
 - Handle user gets banned
 - Handle user timeout (fun ideas...)
 - Hatch and grow feature
+- !lore command
 
 ## Project Structure
 

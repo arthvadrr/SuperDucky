@@ -19,13 +19,20 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      /**
+       * 🧪
+       * Fonts once roamed without a clue,
+       * lost in folders, out of view.
+       * Now they march to paths assigned,
+       * no more chaos, all aligned.
+       * 🧪
+       */
       output: {
         assetFileNames: (assetInfo) => {
-          // Preserve font files under assets/fonts without hashing
-          if (assetInfo.name && assetInfo.name.endsWith('.ttf')) {
+          if (assetInfo?.name && assetInfo?.name.endsWith('.ttf')) {
             return 'assets/fonts/[name][extname]';
           }
-          // Default for other assets
+
           return 'assets/[name].[hash][extname]';
         },
       },
