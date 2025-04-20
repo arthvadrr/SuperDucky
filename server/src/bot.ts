@@ -92,17 +92,27 @@ export async function startDucky(): Promise<void> {
     if (messageText.startsWith('!')) {
       const [ctxCommand] = messageText.slice(1).split(' ');
 
-      if (command === 'walk' || command === 'stop') {
+      if (ctxCommand === 'walk' || ctxCommand === 'stop') {
         ctx.reply('quack! 🐥');
         command = ctxCommand;
       }
     }
 
-    getSocketServer().emit('message', {
-      command,
-      color,
-      username: ctx.userDisplayName ?? '',
-    });
+    if (
+      typeof command === 'string' &&
+      typeof color === 'string' &&
+      typeof messageText === 'string' &&
+      typeof ctx.userDisplayName === 'string'
+    ) {
+      getSocketServer().emit('message', {
+        command,
+        color,
+        messageText,
+        username: ctx.userDisplayName ?? '',
+      });
+    } else {
+      throw new Error('ctx invalid');
+    }
   });
 
   /**
