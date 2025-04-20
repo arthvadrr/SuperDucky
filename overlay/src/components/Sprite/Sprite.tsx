@@ -28,7 +28,7 @@ export interface SpriteProps {
   state?: SpriteStateKey;
   speed?: number;
   color?: string;
-  message: string;
+  messageText: string;
   username: string;
   size: number;
   position?: {
@@ -47,20 +47,39 @@ function Sprite({
   position = { x: 0, y: 0 },
   state = 'walk',
   username = '',
+  messageText,
 }: SpriteProps) {
   const [, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
   const deltaXRef = useRef(deltaX);
+
   useEffect(() => {
     deltaXRef.current = deltaX;
   }, [deltaX]);
+
   const [isPaused, setIsPaused] = useState(false);
   const spriteRef = useRef<HTMLImageElement>(null);
   const frameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
-  const interval = 1000 / 30; // 30fps throttle
+  const interval = 30;
   const hueRotateValue = useMemo(() => getHueRotateAmount(color), []);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
+  const currentMessageText = useRef(messageText);
+  const messageFrameCounter = useRef<number>(0);
+
+  /**
+   * Handle the chat bubble
+   */
+  if (messageText !== currentMessageText.current) {
+    currentMessageText.current = messageText;
+    messageFrameCounter.current = 0;
+  }
+
+  if (messageFrameCounter.current < 165) {
+    messageFrameCounter.current = messageFrameCounter.current + 1;
+  }
+
+  const isShowingMessage = messageFrameCounter.current < 165;
 
   function animateWalk(time: number) {
     if (isPaused) {
@@ -122,6 +141,9 @@ function Sprite({
     frameRef.current = requestAnimationFrame(animateWalk);
   }
 
+  /**
+   * TODO merge into below useEffect (remove useEffect?)
+   */
   useEffect(() => {
     if (state === 'walk' && !isPaused) {
       lastTimeRef.current = 0;
@@ -176,6 +198,17 @@ function Sprite({
     [deltaX],
   );
 
+  console.log(messageFrameCounter.current);
+
+  const messageTextStyles = useMemo<CSSPropertiesWithVars>(
+    (): CSSPropertiesWithVars => ({
+      '--messageTextTransform':
+        'translate(-50%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
+      '--opacity': isShowingMessage ? '1' : '0',
+    }),
+    [deltaX, isShowingMessage],
+  );
+
   return (
     <div
       ref={spriteRef}
@@ -191,6 +224,14 @@ function Sprite({
         style={usernameStyles}
       >
         {username}
+        <div className="message-text-container">
+          <div
+            className="message-text"
+            style={messageTextStyles}
+          >
+            {currentMessageText.current}
+          </div>
+        </div>
       </div>
     </div>
   );
