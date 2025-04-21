@@ -73,7 +73,7 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
     /**
      * Assign fake users
      */
-    generateSpritesInit(0, spriteAssets),
+    generateSpritesInit(5, spriteAssets),
   );
 
   useEffect(() => {

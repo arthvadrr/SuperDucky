@@ -1,4 +1,12 @@
-import { useState, useEffect, useRef, memo, useMemo, useContext } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  memo,
+  useMemo,
+  useContext,
+} from 'react';
 import { UserContext, type Users } from '../../context/UserContext';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
 import type { CSSProperties } from 'react';
@@ -60,7 +68,7 @@ function Sprite({
 
   const { users, setUsers } = useContext(UserContext);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isShowingMessage, setIsShowingMessage] = useState<boolean>(true);
+  const [isShowingMessage, setIsShowingMessage] = useState<boolean>(false);
   const spriteRef = useRef<HTMLImageElement>(null);
   const frameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -73,21 +81,28 @@ function Sprite({
    * Handle the chat bubble
    */
   useEffect(() => {
-    if (isShowingMessage) {
-      const readingLength = messages[0].split(' ').length * 500 + 5000;
+    if (!isShowingMessage || messages.length === 0 || !users?.[username])
+      return;
 
-      messageTimeout.current = setTimeout(() => {
-        setIsShowingMessage(false);
+    const readingLength = messages[0].split(' ').length * 500 + 5000;
+
+    messageTimeout.current = setTimeout(() => {
+      setIsShowingMessage(false);
+      messageTimeout.current = null;
+
+      setUsers((prev: Users) => ({
+        ...prev,
+        [username]: { ...prev[username], messages: messages.slice(1) },
+      }));
+    }, readingLength);
+
+    return () => {
+      if (messageTimeout.current) {
+        clearTimeout(messageTimeout.current);
         messageTimeout.current = null;
-        messages.shift();
-
-        setUsers((prev: Users) => ({
-          ...prev,
-          [username]: { ...prev[username], messages },
-        }));
-      }, readingLength);
-    }
-  }, [isShowingMessage]);
+      }
+    };
+  }, [isShowingMessage, messages.length, users, username]);
 
   useEffect(() => {
     if (messages.length > 0 && !isShowingMessage) {
@@ -97,67 +112,71 @@ function Sprite({
 
       return () => clearTimeout(delay);
     }
-  }, [users[username].messages.length]);
+  }, [messages.length, isShowingMessage]);
 
-  function animateWalk(time: number) {
-    if (isPaused) {
-      lastTimeRef.current = 0;
-      return;
-    }
+  const animateWalk = useCallback(
+    (time: number) => {
+      if (isPaused) {
+        lastTimeRef.current = 0;
+        return;
+      }
 
-    if (!lastTimeRef.current) {
-      lastTimeRef.current = time;
-    }
-    const elapsed = time - lastTimeRef.current;
-    if (elapsed >= interval) {
-      lastTimeRef.current += interval;
+      if (!lastTimeRef.current) {
+        lastTimeRef.current = time;
+      }
+      const elapsed = time - lastTimeRef.current;
+      if (elapsed >= interval) {
+        lastTimeRef.current += interval;
 
-      setPosX((prevX) => {
-        const dir = deltaXRef.current;
-        const nextX = prevX + dir * speedRef.current;
-        const parentWidth = spriteRef.current?.parentElement?.clientWidth ?? 0;
-        const width = spriteRef.current?.clientWidth ?? 0;
-        let clampedX = nextX;
-        let newDir = dir;
+        setPosX((prevX) => {
+          const dir = deltaXRef.current;
+          const nextX = prevX + dir * speedRef.current;
+          const parentWidth =
+            spriteRef.current?.parentElement?.clientWidth ?? 0;
+          const width = spriteRef.current?.clientWidth ?? 0;
+          let clampedX = nextX;
+          let newDir = dir;
 
-        /**
-         * Collison check
-         */
-        if (nextX <= 0) {
-          clampedX = 0;
-          newDir = -dir;
-        } else if (nextX + width >= parentWidth) {
-          clampedX = parentWidth - width;
-          newDir = -dir;
-        }
+          /**
+           * Collision check
+           */
+          if (nextX <= 0) {
+            clampedX = 0;
+            newDir = -dir;
+          } else if (nextX + width >= parentWidth) {
+            clampedX = parentWidth - width;
+            newDir = -dir;
+          }
 
-        /**
-         * Change direction if collided
-         */
-        if (newDir !== dir) {
-          setDeltaX(newDir);
-          deltaXRef.current = newDir;
-        }
+          /**
+           * Change direction if collided
+           */
+          if (newDir !== dir) {
+            setDeltaX(newDir);
+            deltaXRef.current = newDir;
+          }
 
-        /**
-         * CSS transform determines which direction the sprite is facing
-         */
-        const transformValue = newDir < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+          /**
+           * CSS transform determines which direction the sprite is facing
+           */
+          const transformValue = newDir < 0 ? 'scaleX(-1)' : 'scaleX(1)';
 
-        /**
-         * Apply the animation styles
-         */
-        if (spriteRef.current) {
-          spriteRef.current.style.setProperty('--left', `${clampedX}px`);
-          spriteRef.current.style.setProperty('--transform', transformValue);
-        }
+          /**
+           * Apply the animation styles
+           */
+          if (spriteRef.current) {
+            spriteRef.current.style.setProperty('--left', `${clampedX}px`);
+            spriteRef.current.style.setProperty('--transform', transformValue);
+          }
 
-        return clampedX;
-      });
-    }
+          return clampedX;
+        });
+      }
 
-    frameRef.current = requestAnimationFrame(animateWalk);
-  }
+      frameRef.current = requestAnimationFrame(animateWalk);
+    },
+    [isPaused, interval],
+  );
 
   /**
    * TODO merge into below useEffect (remove useEffect?)
@@ -172,7 +191,7 @@ function Sprite({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [state, isPaused]);
+  }, [state, isPaused, animateWalk]);
 
   useEffect(() => {
     if (state !== 'walk') return;
