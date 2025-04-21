@@ -37,7 +37,7 @@ function generateSpriteInstance(spriteAssets: {
     speed: Math.random() * (2 - 0.5) + 0.5,
     position: { x: 0, y: 0 },
     color: getRandomHexColor(),
-    messageText: '',
+    messages: [],
   };
 }
 
@@ -81,10 +81,10 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
       const updated = { ...prevSprites };
 
       for (const username in users) {
-        const { color, messageText } = users[username];
+        const { color, messages } = users[username];
 
         if (updated?.[username]) {
-          updated[username].messageText = messageText ?? '';
+          updated[username].messages = messages;
         } else {
           updated[username] = {
             assets: spriteAssets,
@@ -93,7 +93,7 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
             speed: Math.random() * (2 - 0.5) + 0.5,
             position: { x: 0, y: 0 },
             color: color ?? '',
-            messageText: messageText ?? '',
+            messages: messages,
           };
         }
       }

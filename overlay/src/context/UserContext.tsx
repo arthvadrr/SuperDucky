@@ -5,8 +5,8 @@ import { createContext, SetStateAction, Dispatch } from 'react';
  */
 export interface UserInstance {
   username: string;
-  color?: string;
-  messageText?: string;
+  color: string;
+  messages: string[];
 }
 
 export type Users = Record<string, UserInstance>;

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { useState, useEffect, useRef, memo, useMemo, useContext } from 'react';
+import { UserContext, type Users } from '../../context/UserContext';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
 import type { CSSProperties } from 'react';
 import '../../styles/Sprite.scss';
@@ -28,7 +29,7 @@ export interface SpriteProps {
   state?: SpriteStateKey;
   speed?: number;
   color?: string;
-  messageText: string;
+  messages: string[];
   username: string;
   size: number;
   position?: {
@@ -47,7 +48,7 @@ function Sprite({
   position = { x: 0, y: 0 },
   state = 'walk',
   username = '',
-  messageText,
+  messages,
 }: SpriteProps) {
   const [, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
@@ -57,6 +58,7 @@ function Sprite({
     deltaXRef.current = deltaX;
   }, [deltaX]);
 
+  const { users, setUsers } = useContext(UserContext);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isShowingMessage, setIsShowingMessage] = useState<boolean>(true);
   const spriteRef = useRef<HTMLImageElement>(null);
@@ -71,20 +73,31 @@ function Sprite({
    * Handle the chat bubble
    */
   useEffect(() => {
-    const readingLength = messageText.split(' ').length * 500 + 5000;
+    if (isShowingMessage) {
+      const readingLength = messages[0].split(' ').length * 500 + 5000;
 
-    setIsShowingMessage(true);
+      messageTimeout.current = setTimeout(() => {
+        setIsShowingMessage(false);
+        messageTimeout.current = null;
+        messages.shift();
 
-    if (messageTimeout.current) {
-      clearTimeout(messageTimeout.current);
-      messageTimeout.current = null;
+        setUsers((prev: Users) => ({
+          ...prev,
+          [username]: { ...prev[username], messages },
+        }));
+      }, readingLength);
     }
+  }, [isShowingMessage]);
 
-    messageTimeout.current = setTimeout(() => {
-      setIsShowingMessage(false);
-      messageTimeout.current = null;
-    }, readingLength);
-  }, [messageText]);
+  useEffect(() => {
+    if (messages.length > 0 && !isShowingMessage) {
+      const delay = setTimeout(() => {
+        setIsShowingMessage(true);
+      }, 500);
+
+      return () => clearTimeout(delay);
+    }
+  }, [users[username].messages.length]);
 
   function animateWalk(time: number) {
     if (isPaused) {
@@ -243,7 +256,7 @@ function Sprite({
             className={`message-text ${isShowingMessage ? 'visible' : 'hidden'}`}
             style={messageTextStyles}
           >
-            {messageText}
+            {messages[0] ?? ''}
           </div>
         </div>
       </div>

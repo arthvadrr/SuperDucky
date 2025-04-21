@@ -1,6 +1,6 @@
 import { useState, ReactNode, useEffect, useContext, useMemo } from 'react';
 import { MessageContext } from '../context/MessageContext';
-import { UserContext } from '../context/UserContext';
+import { UserContext, type Users } from '../context/UserContext';
 import socket from '../socket';
 import type { MessageInstance } from '../context/MessageContext';
 
@@ -11,17 +11,17 @@ export function MessageProvider({ children }: { children: ReactNode }) {
   const { users, setUsers } = useContext<UserContext>(UserContext);
   const [userMessages, setUserMessages] = useState<MessageInstance[]>([]);
 
-  /**
-   * TODO fix the useCallback
-   */
-  const addMessage = (msg: MessageInstance) => {
+  function addMessage(msg: MessageInstance) {
     const { username, color, messageText } = msg;
-    const usersCopy = { ...users };
+    const usersCopy: Users = { ...users };
+    const messages: string[] = usersCopy[username]?.messages ?? [];
+
+    messages.push(messageText ?? '');
 
     usersCopy[username] = {
       username,
       color,
-      messageText,
+      messages,
     };
 
     setUsers(usersCopy);
@@ -32,7 +32,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, msg];
     });
-  };
+  }
 
   useEffect(() => {
     socket.on('message', addMessage);

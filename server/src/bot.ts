@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import { ApiClient } from '@twurple/api';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { getSocketServer } from './socket';
+import { MessageEvent } from '@twurple/easy-bot';
 import { Bot } from '@twurple/easy-bot';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -77,6 +78,18 @@ export async function startDucky(): Promise<void> {
 
   console.log('Joining channel...', process.env.VITE_TWITCH_CHANNEL);
 
+  function emitDuckyBotMessage(ctx: MessageEvent) {
+    const reply = 'quack! 🐥';
+
+    ctx.reply(reply);
+
+    getSocketServer().emit('message', {
+      messageText: reply,
+      username: 'Super_Ducky_Bot',
+      color: '#FFDB50',
+    });
+  }
+
   const bot = new Bot({
     authProvider,
     channels: [process.env.VITE_TWITCH_CHANNEL ?? ''],
@@ -93,7 +106,7 @@ export async function startDucky(): Promise<void> {
       const [ctxCommand] = messageText.slice(1).split(' ');
 
       if (ctxCommand === 'walk' || ctxCommand === 'stop') {
-        ctx.reply('quack! 🐥');
+        emitDuckyBotMessage(ctx);
         command = ctxCommand;
       }
     }

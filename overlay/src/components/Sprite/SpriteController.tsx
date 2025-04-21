@@ -7,7 +7,7 @@ export interface SpriteInstance {
   assets: SpriteStateAssets;
   state: 'idle' | 'walk' | 'talk';
   position: { x: number; y: number };
-  messageText: string;
+  messages: string[];
   size: number;
   speed: number;
   color: string;
@@ -29,7 +29,7 @@ function SpriteController() {
             state={sprite.state}
             color={sprite.color}
             username={String(key)}
-            messageText={sprite.messageText}
+            messages={sprite.messages}
           />
         );
       })}
