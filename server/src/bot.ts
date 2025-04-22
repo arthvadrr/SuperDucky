@@ -95,10 +95,10 @@ export async function startDucky(): Promise<void> {
 
   const apiClient = new ApiClient({ authProvider });
 
-  bot.onMessage(async (ctx) => {
-    const messageText: string = ctx.text;
-    const color = (await apiClient.chat.getColorForUser(ctx.userId)) ?? '';
-    let command = '';
+  bot.onMessage(async (ctx: MessageEvent): Promise<void> => {
+    const messageText: string = String(ctx.text);
+    const color: string = (await apiClient.chat.getColorForUser(ctx.userId)) ?? '';
+    let command: string = '';
 
     if (messageText.startsWith('!')) {
       const [ctxCommand] = messageText.slice(1).split(' ');
@@ -112,21 +112,13 @@ export async function startDucky(): Promise<void> {
       }
     }
 
-    if (
-      typeof command === 'string' &&
-      typeof color === 'string' &&
-      typeof messageText === 'string' &&
-      typeof ctx.userDisplayName === 'string'
-    ) {
+    
       getSocketServer().emit('message', {
         command,
         color,
         messageText,
         username: ctx.userDisplayName ?? '',
       });
-    } else {
-      throw new Error('ctx invalid');
-    }
   });
 
   /**

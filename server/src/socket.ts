@@ -14,7 +14,10 @@ export function initializeSocketServer(httpServer: HTTPServer): void {
 
   socketServer = new Server(httpServer, {
     cors: {
-      origin: `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_FRONTEND_PORT ?? '3000'}`,
+      origin: [
+        `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_FRONTEND_PORT ?? '3000'}`,
+        `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_VUE_OVERLAY_PORT ?? '3000'}`
+      ],
       methods: ['GET', 'POST'],
       credentials: true,
     },
