@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, ReactNode, useMemo } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { SpriteContext } from '../context/SpriteContext';
 import { UserContext } from '../context/UserContext';
 import { getRandomHexColor } from '../util/getRandomHexColor';
@@ -7,21 +7,22 @@ import {
   type MessageContextType,
 } from '../context/MessageContext';
 import type { SpriteInstance } from '../components/Sprite/SpriteController';
+import type { ReactNode, Dispatch, SetStateAction } from 'react';
 
 export type Sprites = Record<string, SpriteInstance>;
 
 export interface SpriteContextType {
   sprites: Sprites;
-  setSprites: React.Dispatch<React.SetStateAction<Sprites>>;
+  setSprites: Dispatch<SetStateAction<Sprites>>;
 }
 
-const adjectives = ['happy', 'bouncy', 'brave', 'fuzzy', 'silly'];
-const nouns = ['duck', 'cat', 'pup', 'frog', 'bee'];
+const adjectives: string[] = ['happy', 'bouncy', 'brave', 'fuzzy', 'silly'];
+const nouns: string[] = ['duck', 'cat', 'pup', 'frog', 'bee'];
 
 function generateUsername(): string {
-  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  const num = Math.floor(Math.random() * 1000);
+  const adj: string = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun: string = nouns[Math.floor(Math.random() * nouns.length)];
+  const num: number = Math.floor(Math.random() * 1000);
   return `${adj}${noun}${num}`;
 }
 
@@ -73,11 +74,11 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
     /**
      * Assign fake users
      */
-    generateSpritesInit(5, spriteAssets),
+    generateSpritesInit(10, spriteAssets),
   );
 
   useEffect(() => {
-    setSprites((prevSprites) => {
+    setSprites((prevSprites: Sprites) => {
       const updated = { ...prevSprites };
 
       for (const username in users) {
@@ -85,6 +86,7 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
 
         if (updated?.[username]) {
           updated[username].messages = messages;
+          updated[username].color = color ?? '';
         } else {
           updated[username] = {
             assets: spriteAssets,

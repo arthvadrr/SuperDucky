@@ -26,7 +26,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
 
     setUsers(usersCopy);
 
-    setUserMessages((prev) => {
+    setUserMessages((prev: MessageInstance[]): MessageInstance[] => {
       if (prev.length >= 30) {
         return [...prev.slice(1), msg];
       }
@@ -34,7 +34,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  useEffect(() => {
+  useEffect((): () => void => {
     socket.on('message', addMessage);
 
     return () => {

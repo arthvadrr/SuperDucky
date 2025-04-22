@@ -2,30 +2,26 @@
   position: absolute;
   display: flex;
   justify-content: center;
-  width: var(--width);
-  height: var(--height);
   left: var(--left);
   top: var(--top);
-  transform: var(--transform);
-  color: var(--color);
 
   .sprite {
     background-size: contain;
     background-repeat: no-repeat;
-    background-image: var(--backgroundImage);
+    background-image: var(--spriteBackgroundImage);
     background-position: center;
-    width: var(--width);
-    height: var(--height);
-    filter: var(--filter);
+    width: var(--spriteWidth);
+    height: var(--spriteHeight);
+    filter: var(--spriteFilter);
+    transform: var(--spriteTransform);
   }
 
   .username {
     position: absolute;
-    top: 0;
+    top: -40px;
     padding: 4px 8px;
-    color: var(--color);
-    background-color: #18181a;
-    transform: var(--usernameTransform);
+    color: var(--usernameColor);
+    background-color: rgba(#18181a, 0.85);
   }
 
   .message-text-container {

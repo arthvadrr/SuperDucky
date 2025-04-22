@@ -5,11 +5,11 @@ import {
   useCallback,
   memo,
   useMemo,
-  useContext,
+  useContext, RefObject,
 } from 'react';
 import { UserContext, type Users } from '../../context/UserContext';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import '../../styles/Sprite.scss';
 
 /**
@@ -57,23 +57,23 @@ function Sprite({
   state = 'walk',
   username = '',
   messages,
-}: SpriteProps) {
+}: SpriteProps): ReactElement {
   const [, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
-  const deltaXRef = useRef(deltaX);
+  const deltaXRef: RefObject<number> = useRef(deltaX);
 
-  useEffect(() => {
+  useEffect((): void => {
     deltaXRef.current = deltaX;
   }, [deltaX]);
 
   const { users, setUsers } = useContext(UserContext);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isShowingMessage, setIsShowingMessage] = useState<boolean>(false);
-  const spriteRef = useRef<HTMLImageElement>(null);
+  const spriteRef: RefObject<HTMLImageElement | null> = useRef<HTMLImageElement>(null);
   const frameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const interval = 33;
-  const hueRotateValue = useMemo(() => getHueRotateAmount(color), []);
+  const hueRotateValue = useMemo(() => getHueRotateAmount(color), [color]);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
   const messageTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -84,7 +84,7 @@ function Sprite({
     if (!isShowingMessage || messages.length === 0 || !users?.[username])
       return;
 
-    const readingLength = messages[0].split(' ').length * 500 + 5000;
+    const readingLength: number = messages[0].split(' ').length * 500 + 5000;
 
     messageTimeout.current = setTimeout(() => {
       setIsShowingMessage(false);
@@ -216,7 +216,7 @@ function Sprite({
   }, [state, isPaused]);
 
   function getBackgroundImage() {
-    let result = '';
+    let result: string = '';
 
     if (state === 'walk' && isPaused) {
       result = assets.idle;
@@ -227,27 +227,28 @@ function Sprite({
     return result;
   }
 
+  
+  
   const spriteStyles = useMemo<CSSPropertiesWithVars>(
     (): CSSPropertiesWithVars => ({
-      '--width': `${size}px`,
-      '--height': `${size}px`,
-      '--bottom': `${position.y}px`,
-      '--color': color,
-      '--backgroundImage': `url(${getBackgroundImage()})`,
-      '--filter': `hue-rotate(${hueRotateValue}deg)`,
+      '--spriteWidth': `${size}px`,
+      '--spriteHeight': `${size}px`,
+      '--spriteBottom': `${position.y}px`,
+      '--spriteBackgroundImage': `url(${getBackgroundImage()})`,
+      '--spriteFilter': `hue-rotate(${hueRotateValue}deg)`,
+      '--spriteTransform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
     }),
-    [size, position.y, state, isPaused, hueRotateValue],
+    [size, position.y, state, isPaused, hueRotateValue, deltaX],
   );
 
-  const usernameStyles = useMemo<CSSPropertiesWithVars>(
+  const usernameStyles: CSSPropertiesWithVars = useMemo<CSSPropertiesWithVars>(
     (): CSSPropertiesWithVars => ({
-      '--usernameTransform':
-        'translate(0, -130%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
+      '--usernameColor': color,
     }),
     [deltaX],
   );
 
-  const messageTextStyles = useMemo<CSSPropertiesWithVars>(
+  const messageTextStyles: CSSPropertiesWithVars = useMemo<CSSPropertiesWithVars>(
     (): CSSPropertiesWithVars => ({
       '--messageTextTransform':
         'translate(-50%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
@@ -259,12 +260,11 @@ function Sprite({
     <div
       ref={spriteRef}
       className="sprite-container"
-      style={spriteStyles}
     >
       <div
         className="sprite"
-        style={usernameStyles}
-      ></div>
+        style={spriteStyles}
+      />
       <div
         className="username"
         style={usernameStyles}
@@ -279,7 +279,14 @@ function Sprite({
           </div>
         </div>
       </div>
+      <div
+        ref={spriteRef}
+        className="sprite-container"
+        style={spriteStyles}
+      >
+      </div>
     </div>
   );
 }
+
 export default memo(Sprite);
