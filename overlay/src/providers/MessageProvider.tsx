@@ -17,7 +17,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     const messages: string[] = usersCopy[username]?.messages ?? [];
 
     messages.push(messageText ?? '');
-
+    
     usersCopy[username] = {
       username,
       color,

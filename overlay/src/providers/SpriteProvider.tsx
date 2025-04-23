@@ -51,6 +51,16 @@ function generateSpritesInit(
     const name = generateUsername();
     result[name] = generateSpriteInstance(spriteAssets);
   }
+
+  result.Super_Ducky_Bot = {
+    assets: spriteAssets,
+    state: 'walk',
+    size: Math.random() * (100 - 50) + 50,
+    speed: Math.random() * (2 - 0.5) + 0.5,
+    position: { x: 0, y: 0 },
+    color: '#FFDB50',
+    messages: [],
+  };
   return result;
 }
 
@@ -74,7 +84,7 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
     /**
      * Assign fake users
      */
-    generateSpritesInit(10, spriteAssets),
+    generateSpritesInit(0, spriteAssets),
   );
 
   useEffect(() => {
@@ -83,6 +93,8 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
 
       for (const username in users) {
         const { color, messages } = users[username];
+        
+        console.log('up', updated);
 
         if (updated?.[username]) {
           updated[username].messages = messages;
