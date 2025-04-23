@@ -13,6 +13,7 @@ SuperDucky is my Twitch bot!
 - Hatch and grow feature
 - Helix emotes
 - !lore command
+- Possible ideas (custom chat buble, custom text color and effect, custom duck skins, accessoires, hats, different size)
 
 ## Project Structure
 
