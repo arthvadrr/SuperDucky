@@ -78,14 +78,16 @@ export async function startDucky(): Promise<void> {
 
   console.log('Joining channel...', process.env.VITE_TWITCH_CHANNEL);
 
-  function emitDuckyBotMessage(ctx: MessageEvent, messageText: string) {
-    ctx.reply(messageText);
+  async function emitDuckyBotMessage(ctx: MessageEvent, messageText: string): Promise<void> {
+    await ctx.reply(messageText);
 
-    getSocketServer().emit('message', {
-      messageText: messageText,
-      username: 'Super_Ducky_Bot',
-      color: '#FFDB50',
-    });
+    setTimeout(() => {
+      getSocketServer().emit('message', {
+        color: '#FFDB50',
+        messageText: messageText,
+        username: 'Super_Ducky_Bot',
+      });
+    }, 1000);
   }
 
   const bot = new Bot({
@@ -104,21 +106,20 @@ export async function startDucky(): Promise<void> {
       const [ctxCommand] = messageText.slice(1).split(' ');
 
       if (ctxCommand === 'walk' || ctxCommand === 'stop') {
-        emitDuckyBotMessage(
+        await emitDuckyBotMessage(
           ctx,
           `quack! 🐥 ${ctxCommand} @${ctx.userDisplayName}`,
         );
-        command = ctxCommand;
       }
     }
 
-    
-      getSocketServer().emit('message', {
-        command,
-        color,
-        messageText,
-        username: ctx.userDisplayName ?? '',
-      });
+
+    getSocketServer().emit('message', {
+      command,
+      color,
+      messageText,
+      username: ctx.userDisplayName ?? '',
+    });
   });
 
   /**
