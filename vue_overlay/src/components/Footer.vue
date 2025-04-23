@@ -1,11 +1,9 @@
 <template>
-  <div>
-    footer
-  </div>
+    <SpriteController/>
 </template>
 
 <script setup lang="ts">
-  console.log('footer');
+  import SpriteController from './SpriteController.vue';
 </script>
 
 <style scoped>
