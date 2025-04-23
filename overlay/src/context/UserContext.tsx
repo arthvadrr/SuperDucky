@@ -5,18 +5,21 @@ import { createContext, SetStateAction, Dispatch } from 'react';
  */
 export interface UserInstance {
   username: string;
-  color?: string;
+  color: string;
+  messages: string[];
 }
 
+export type Users = Record<string, UserInstance>;
+
 export interface UserContext {
-  users: UserInstance[];
-  setUsers: Dispatch<SetStateAction<UserInstance[]>>;
+  users: Users;
+  setUsers: Dispatch<SetStateAction<Users>>;
 }
 
 /**
  * Create the context
  */
 export const UserContext = createContext<UserContext>({
-  users: [],
+  users: {},
   setUsers: () => {},
 });

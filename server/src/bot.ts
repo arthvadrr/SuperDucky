@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import { ApiClient } from '@twurple/api';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { getSocketServer } from './socket';
+import { MessageEvent } from '@twurple/easy-bot';
 import { Bot } from '@twurple/easy-bot';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -77,6 +78,18 @@ export async function startDucky(): Promise<void> {
 
   console.log('Joining channel...', process.env.VITE_TWITCH_CHANNEL);
 
+  async function emitDuckyBotMessage(ctx: MessageEvent, messageText: string): Promise<void> {
+    await ctx.reply(messageText);
+
+    setTimeout(() => {
+      getSocketServer().emit('message', {
+        color: '#FFDB50',
+        messageText: messageText,
+        username: 'Super_Ducky_Bot',
+      });
+    }, 1000);
+  }
+
   const bot = new Bot({
     authProvider,
     channels: [process.env.VITE_TWITCH_CHANNEL ?? ''],
@@ -84,23 +97,27 @@ export async function startDucky(): Promise<void> {
 
   const apiClient = new ApiClient({ authProvider });
 
-  bot.onMessage(async (ctx) => {
-    const messageText: string = ctx.text;
-    const color = (await apiClient.chat.getColorForUser(ctx.userId)) ?? '';
-    let command = '';
+  bot.onMessage(async (ctx: MessageEvent): Promise<void> => {
+    const messageText: string = String(ctx.text);
+    const color: string = (await apiClient.chat.getColorForUser(ctx.userId)) ?? '';
+    let command: string = '';
 
     if (messageText.startsWith('!')) {
       const [ctxCommand] = messageText.slice(1).split(' ');
 
-      if (command === 'walk' || command === 'stop') {
-        ctx.reply('quack! 🐥');
-        command = ctxCommand;
+      if (ctxCommand === 'walk' || ctxCommand === 'stop') {
+        await emitDuckyBotMessage(
+          ctx,
+          `quack! 🐥 ${ctxCommand} @${ctx.userDisplayName}`,
+        );
       }
     }
+
 
     getSocketServer().emit('message', {
       command,
       color,
+      messageText,
       username: ctx.userDisplayName ?? '',
     });
   });

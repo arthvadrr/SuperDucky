@@ -1,55 +1,54 @@
-import { useState, ReactNode, useEffect, useCallback, useContext } from 'react';
+import { useState, ReactNode, useEffect, useContext, useMemo } from 'react';
 import { MessageContext } from '../context/MessageContext';
-import { UserContext, type UserInstance } from '../context/UserContext';
-import type { MessageInstance } from '../context/MessageContext';
+import { UserContext, type Users } from '../context/UserContext';
 import socket from '../socket';
+import type { MessageInstance } from '../context/MessageContext';
 
 /**
  * Create the provider
  */
 export function MessageProvider({ children }: { children: ReactNode }) {
-  const { users, setUsers } = useContext(UserContext);
+  const { users, setUsers } = useContext<UserContext>(UserContext);
   const [userMessages, setUserMessages] = useState<MessageInstance[]>([]);
 
-  const addMessage = useCallback((msg: MessageInstance) => {
-    const { username, color } = msg;
+  function addMessage(msg: MessageInstance) {
+    const { username, color, messageText } = msg;
+    const usersCopy: Users = { ...users };
+    const messages: string[] = usersCopy[username]?.messages ?? [];
 
-    if (
-      username &&
-      !users.some((user: UserInstance) => user.username === username)
-    ) {
-      setUsers((prev) => [...prev, { username, color }]);
-    }
+    messages.push(messageText ?? '');
+    
+    usersCopy[username] = {
+      username,
+      color,
+      messages,
+    };
 
-    setUserMessages((prev) => {
+    setUsers(usersCopy);
+
+    setUserMessages((prev: MessageInstance[]): MessageInstance[] => {
       if (prev.length >= 30) {
         return [...prev.slice(1), msg];
       }
       return [...prev, msg];
     });
-  }, []);
+  }
 
-  /**
-   * Memoize our function reference for cleanup
-   */
-  const onReceiveMessage = useCallback(
-    (message: MessageInstance) => addMessage(message),
-    [addMessage],
-  );
-
-  /**
-   * Listen for messages
-   */
-  useEffect(() => {
-    socket.on('message', onReceiveMessage);
+  useEffect((): () => void => {
+    socket.on('message', addMessage);
 
     return () => {
-      socket.off('message', onReceiveMessage);
+      socket.off('message', addMessage);
     };
-  }, [onReceiveMessage]);
+  }, [addMessage]);
+
+  const messageContextValue = useMemo(
+    () => ({ userMessages, addMessage }),
+    [userMessages, addMessage],
+  );
 
   return (
-    <MessageContext.Provider value={{ userMessages, addMessage }}>
+    <MessageContext.Provider value={messageContextValue}>
       {children}
     </MessageContext.Provider>
   );

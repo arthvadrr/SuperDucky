@@ -1,86 +1,128 @@
-import { useContext, useEffect, useState, ReactNode } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { SpriteContext } from '../context/SpriteContext';
-import { UserContext, type UserInstance } from '../context/UserContext';
+import { UserContext } from '../context/UserContext';
+import { getRandomHexColor } from '../util/getRandomHexColor';
+import {
+  MessageContext,
+  type MessageContextType,
+} from '../context/MessageContext';
 import type { SpriteInstance } from '../components/Sprite/SpriteController';
+import type { ReactNode, Dispatch, SetStateAction } from 'react';
 
 export type Sprites = Record<string, SpriteInstance>;
 
 export interface SpriteContextType {
   sprites: Sprites;
-  setSprites: React.Dispatch<React.SetStateAction<Sprites>>;
+  setSprites: Dispatch<SetStateAction<Sprites>>;
 }
 
-const spritesInit: Sprites = {
-  arthvadrr: {
-    assets: {
-      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-    },
+const adjectives: string[] = ['happy', 'bouncy', 'brave', 'fuzzy', 'silly'];
+const nouns: string[] = ['duck', 'cat', 'pup', 'frog', 'bee'];
+
+function generateUsername(): string {
+  const adj: string = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun: string = nouns[Math.floor(Math.random() * nouns.length)];
+  const num: number = Math.floor(Math.random() * 1000);
+  return `${adj}${noun}${num}`;
+}
+
+function generateSpriteInstance(spriteAssets: {
+  idle: string;
+  walk: string;
+  talk: string;
+}): SpriteInstance {
+  return {
+    assets: spriteAssets,
     state: 'walk',
-    size: Math.random() * (100 - 75) + 75,
+    size: Math.random() * (100 - 50) + 50,
+    speed: Math.random() * (2 - 0.5) + 0.5,
     position: { x: 0, y: 0 },
-    color: '#FF0000',
-  },
-  SomeUser: {
-    assets: {
-      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-    },
+    color: getRandomHexColor(),
+    messages: [],
+  };
+}
+
+function generateSpritesInit(
+  count: number,
+  spriteAssets: { idle: string; walk: string; talk: string },
+): Sprites {
+  const result: Sprites = {};
+  for (let i = 0; i < count; i++) {
+    const name = generateUsername();
+    result[name] = generateSpriteInstance(spriteAssets);
+  }
+
+  result.Super_Ducky_Bot = {
+    assets: spriteAssets,
     state: 'walk',
-    size: Math.random() * (100 - 75) + 75,
+    size: Math.random() * (100 - 50) + 50,
+    speed: Math.random() * (2 - 0.5) + 0.5,
     position: { x: 0, y: 0 },
-    color: '#00FFaa',
-  },
-  loserBum: {
-    assets: {
-      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-    },
-    state: 'walk',
-    size: Math.random() * (100 - 75) + 75,
-    position: { x: 0, y: 0 },
-    color: '#aaaaFF',
-  },
-};
+    color: '#FFDB50',
+    messages: [],
+  };
+  return result;
+}
 
 /**
- * The provider wrapper
+ * 🦆 Rise duckies 🦆
  */
 export function SpriteProvider({ children }: { children: ReactNode }) {
-  const { users } = useContext(UserContext);
-  const [sprites, setSprites] = useState<Sprites>(spritesInit);
+  const { userMessages } = useContext<MessageContextType>(MessageContext);
+  const { users } = useContext<UserContext>(UserContext);
+
+  const spriteAssets = useMemo(
+    () => ({
+      idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
+      walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
+      talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
+    }),
+    [],
+  );
+
+  const [sprites, setSprites] = useState<Sprites>(() =>
+    /**
+     * Assign fake users
+     */
+    generateSpritesInit(0, spriteAssets),
+  );
 
   useEffect(() => {
-    if (Array.isArray(users)) {
-      const updatedSprites: Sprites = { ...sprites };
+    setSprites((prevSprites: Sprites) => {
+      const updated = { ...prevSprites };
 
-      users.forEach(({ username, color }: UserInstance) => {
-        if (!sprites?.[username]) {
-          updatedSprites[String(username)] = {
-            assets: {
-              idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-              walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-              talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-            },
+      for (const username in users) {
+        const { color, messages } = users[username];
+        
+        console.log('up', updated);
+
+        if (updated?.[username]) {
+          updated[username].messages = messages;
+          updated[username].color = color ?? '';
+        } else {
+          updated[username] = {
+            assets: spriteAssets,
             state: 'walk',
             size: Math.random() * (100 - 50) + 50,
+            speed: Math.random() * (2 - 0.5) + 0.5,
             position: { x: 0, y: 0 },
             color: color ?? '',
+            messages: messages,
           };
         }
-      });
-
-      if (Object.keys(updatedSprites).length !== Object.keys(sprites).length) {
-        setSprites(updatedSprites);
       }
-    }
-  }, [users, sprites]);
+
+      return updated;
+    });
+  }, [users, spriteAssets, userMessages.length]);
+
+  const spriteContextValue = useMemo(
+    () => ({ sprites, setSprites }),
+    [sprites],
+  );
 
   return (
-    <SpriteContext.Provider value={{ sprites, setSprites }}>
+    <SpriteContext.Provider value={spriteContextValue}>
       {children}
     </SpriteContext.Provider>
   );

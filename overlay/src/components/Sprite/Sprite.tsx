@@ -1,7 +1,25 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import type { CSSProperties } from 'react';
-import '../../styles/Sprite.scss';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  memo,
+  useMemo,
+  useContext, RefObject,
+} from 'react';
+import { UserContext, type Users } from '../../context/UserContext';
 import { getHueRotateAmount } from '../../util/getHueRotateAmount';
+import type { CSSProperties, ReactElement } from 'react';
+import '../../styles/Sprite.scss';
+
+/**
+ * Extend CSSProperties to include CSS custom properties (variables)
+ */
+type CSSVarProperties = {
+  [key: `--${string}`]: string;
+};
+
+type CSSPropertiesWithVars = CSSProperties & CSSVarProperties;
 
 /**
  * Types and interfaces
@@ -19,6 +37,7 @@ export interface SpriteProps {
   state?: SpriteStateKey;
   speed?: number;
   color?: string;
+  messages: string[];
   username: string;
   size: number;
   position?: {
@@ -30,46 +49,141 @@ export interface SpriteProps {
 /**
  * FC Sprite
  */
-export default function Sprite({
+function Sprite({
   assets,
   color = '',
   size,
   position = { x: 0, y: 0 },
   state = 'walk',
   username = '',
-}: SpriteProps) {
-  const spriteRef = useRef<HTMLImageElement>(null);
-  const frameRef = useRef<number | null>(null);
-  const [posX, setPosX] = useState(position.x);
+  messages,
+}: SpriteProps): ReactElement {
+  const [, setPosX] = useState(position.x);
   const [deltaX, setDeltaX] = useState(1);
-  const [isPaused, setIsPaused] = useState(false);
-  const rotatedHue = useCallback(() => getHueRotateAmount(color), [color]);
+  const deltaXRef: RefObject<number> = useRef(deltaX);
+
+  useEffect((): void => {
+    deltaXRef.current = deltaX;
+  }, [deltaX]);
+
+  const { users, setUsers } = useContext(UserContext);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isShowingMessage, setIsShowingMessage] = useState<boolean>(false);
+  const spriteRef: RefObject<HTMLImageElement | null> = useRef<HTMLImageElement>(null);
+  const frameRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+  const interval = 33;
+  const hueRotateValue = useMemo(() => getHueRotateAmount(color), [color]);
   const speedRef = useRef(Math.random() * (3 - 0.5) + 0.5);
+  const messageTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function animateWalk() {
-    const sprite = spriteRef.current;
-
-    if (isPaused) {
+  /**
+   * Handle the chat bubble
+   */
+  useEffect(() => {
+    if (!isShowingMessage || messages.length === 0 || !users?.[username])
       return;
+
+    const readingLength: number = messages[0].split(' ').length * 500 + 5000;
+
+    messageTimeout.current = setTimeout(() => {
+      setIsShowingMessage(false);
+      messageTimeout.current = null;
+
+      setUsers((prev: Users) => ({
+        ...prev,
+        [username]: { ...prev[username], messages: messages.slice(1) },
+      }));
+    }, readingLength);
+
+    return () => {
+      if (messageTimeout.current) {
+        clearTimeout(messageTimeout.current);
+        messageTimeout.current = null;
+      }
+    };
+  }, [isShowingMessage, messages.length, users, username]);
+
+  useEffect(() => {
+    if (messages.length > 0 && !isShowingMessage) {
+      const delay = setTimeout(() => {
+        setIsShowingMessage(true);
+      }, 500);
+
+      return () => clearTimeout(delay);
     }
+  }, [messages.length, isShowingMessage]);
 
-    if (sprite && sprite.parentElement) {
-      const parentWidth = sprite.parentElement.clientWidth;
-      const width = sprite.clientWidth;
-      const newX = posX + deltaX * speedRef.current;
+  const animateWalk = useCallback(
+    (time: number) => {
+      if (isPaused) {
+        lastTimeRef.current = 0;
+        return;
+      }
 
-      if (newX <= 0 || newX + width >= parentWidth) {
-        setDeltaX((prev) => -prev);
-      } else {
-        setPosX(newX);
+      if (!lastTimeRef.current) {
+        lastTimeRef.current = time;
+      }
+      const elapsed = time - lastTimeRef.current;
+      if (elapsed >= interval) {
+        lastTimeRef.current += interval;
+
+        setPosX((prevX) => {
+          const dir = deltaXRef.current;
+          const nextX = prevX + dir * speedRef.current;
+          const parentWidth =
+            spriteRef.current?.parentElement?.clientWidth ?? 0;
+          const width = spriteRef.current?.clientWidth ?? 0;
+          let clampedX = nextX;
+          let newDir = dir;
+
+          /**
+           * Collision check
+           */
+          if (nextX <= 0) {
+            clampedX = 0;
+            newDir = -dir;
+          } else if (nextX + width >= parentWidth) {
+            clampedX = parentWidth - width;
+            newDir = -dir;
+          }
+
+          /**
+           * Change direction if collided
+           */
+          if (newDir !== dir) {
+            setDeltaX(newDir);
+            deltaXRef.current = newDir;
+          }
+
+          /**
+           * CSS transform determines which direction the sprite is facing
+           */
+          const transformValue = newDir < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+
+          /**
+           * Apply the animation styles
+           */
+          if (spriteRef.current) {
+            spriteRef.current.style.setProperty('--left', `${clampedX}px`);
+            spriteRef.current.style.setProperty('--transform', transformValue);
+          }
+
+          return clampedX;
+        });
       }
 
       frameRef.current = requestAnimationFrame(animateWalk);
-    }
-  }
+    },
+    [isPaused, interval],
+  );
 
+  /**
+   * TODO merge into below useEffect (remove useEffect?)
+   */
   useEffect(() => {
     if (state === 'walk' && !isPaused) {
+      lastTimeRef.current = 0;
       frameRef.current = requestAnimationFrame(animateWalk);
     }
     return () => {
@@ -77,7 +191,7 @@ export default function Sprite({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [state, posX, deltaX, isPaused]);
+  }, [state, isPaused, animateWalk]);
 
   useEffect(() => {
     if (state !== 'walk') return;
@@ -101,38 +215,78 @@ export default function Sprite({
     return () => clearTimeout(timerId);
   }, [state, isPaused]);
 
-  const spriteStyles: CSSProperties = {
-    '--width': `${size}px`,
-    '--height': `${size}px`,
-    '--left': `${posX}px`,
-    '--bottom': `${position.y}px`,
-    '--color': color,
-    '--transform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
-    '--backgroundImage': `url(${state === 'walk' && isPaused ? assets.idle : assets[state]})`,
-    '--filter': `hue-rotate(${rotatedHue()}deg)`,
-  } as CSSProperties;
+  function getBackgroundImage() {
+    let result: string = '';
 
-  const usernameStyles: CSSProperties = {
-    '--usernameTransform':
-      'translate(0, -130%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
-  } as CSSProperties;
+    if (state === 'walk' && isPaused) {
+      result = assets.idle;
+    } else {
+      result = assets[state];
+    }
+
+    return result;
+  }
+
+  
+  
+  const spriteStyles = useMemo<CSSPropertiesWithVars>(
+    (): CSSPropertiesWithVars => ({
+      '--spriteWidth': `${size}px`,
+      '--spriteHeight': `${size}px`,
+      '--spriteBottom': `${position.y}px`,
+      '--spriteBackgroundImage': `url(${getBackgroundImage()})`,
+      '--spriteFilter': `hue-rotate(${hueRotateValue}deg)`,
+      '--spriteTransform': deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)',
+    }),
+    [size, position.y, state, isPaused, hueRotateValue, deltaX],
+  );
+
+  const usernameStyles: CSSPropertiesWithVars = useMemo<CSSPropertiesWithVars>(
+    (): CSSPropertiesWithVars => ({
+      '--usernameColor': color,
+    }),
+    [deltaX],
+  );
+
+  const messageTextStyles: CSSPropertiesWithVars = useMemo<CSSPropertiesWithVars>(
+    (): CSSPropertiesWithVars => ({
+      '--messageTextTransform':
+        'translate(-50%)' + (deltaX < 0 ? 'scaleX(-1)' : 'scaleX(1)'),
+    }),
+    [deltaX, isShowingMessage],
+  );
 
   return (
     <div
       ref={spriteRef}
       className="sprite-container"
-      style={spriteStyles}
     >
       <div
         className="sprite"
-        style={usernameStyles}
-      ></div>
+        style={spriteStyles}
+      />
       <div
         className="username"
         style={usernameStyles}
       >
         {username}
+        <div className="message-text-container">
+          <div
+            className={`message-text ${isShowingMessage ? 'visible' : 'hidden'}`}
+            style={messageTextStyles}
+          >
+            {messages[0] ?? ''}
+          </div>
+        </div>
+      </div>
+      <div
+        ref={spriteRef}
+        className="sprite-container"
+        style={spriteStyles}
+      >
       </div>
     </div>
   );
 }
+
+export default memo(Sprite);

@@ -10,6 +10,10 @@ SuperDucky is my Twitch bot!
 - Handle message profanity
 - Handle user gets banned
 - Handle user timeout (fun ideas...)
+- Hatch and grow feature
+- Helix emotes
+- !lore command
+- Possible ideas (custom chat buble, custom text color and effect, custom duck skins, accessoires, hats, different size)
 
 ## Project Structure
 

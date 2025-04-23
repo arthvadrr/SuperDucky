@@ -1,0 +1,23 @@
+@font-face {
+  font-family: 'MonaspaceKrypton';
+  src: url('/fonts/MonaspaceKrypton-Regular.ttf') format('truetype');
+}
+
+:root {
+  font-weight : 400;
+  margin      : 0;
+  padding     : 0;
+  box-sizing  : border-box;
+  font-family : "MonaspaceKrypton", serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
