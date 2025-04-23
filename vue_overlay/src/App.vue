@@ -1,7 +1,6 @@
 <template>
   <main class="scaffold">
     <div class="grid">
-      {{ JSON.stringify(state.messages) }}
       <Header />
       <Footer />
       <Sidebar />
@@ -13,10 +12,8 @@
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import Sidebar from './components/Sidebar.vue'
-import state from '../src/stores/state'
 import './controllers/MessageController'
 
-console.log(state.messages);
 </script>
 
 <style scoped lang="scss">
@@ -61,9 +58,9 @@ body {
 
   .grid > div:nth-child(2) {
     position: relative;
-    grid-area: body;
     display: grid;
     align-items: end;
+    grid-area: body;
   }
 
   .grid > div:nth-child(3) {
