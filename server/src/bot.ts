@@ -15,7 +15,7 @@ export async function startDucky(): Promise<void> {
   const clientSecret: string = process.env.CLIENT_SECRET ?? '';
   const accessToken: string = process.env.ACCESS_TOKEN ?? '';
   const refreshToken: string = process.env.REFRESH_TOKEN ?? '';
-  const tokenPath = path.join(__dirname, 'tokens.json');
+  const tokenPath: string = path.join(__dirname, 'tokens.json');
 
   if (
     !clientId ||

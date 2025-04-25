@@ -13,11 +13,11 @@ const socket: Socket = io(
 /**
  * Static asset paths
  */
-const spriteAssets: Record<'idle' | 'walk' | 'talk', string> = {
-  idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-  walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-  talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-}
+const spriteAssets: string[] = [
+  '/sprites/baby-ducky/baby-ducky-idle.webp',
+  '/sprites/baby-ducky/baby-ducky-walk.webp',
+  '/sprites/baby-ducky/baby-ducky-talking.webp',
+];
 
 /**
  * Listen for messages
@@ -34,16 +34,13 @@ socket.on('message', (ctx): void => {
       color: color,
       messages: [messageText],
       assets: spriteAssets,
-      state: 'walk',
+      state: 1,
       size: Math.random() * (100 - 50) + 50,
       speed: Math.random() * (2 - 0.5) + 0.5,
       position: { x: 0, y: 0 },
-    }
+    };
   } else {
-    const {
-      color: currentColor,
-      messages: currentMessages
-    }: Partial<Sprite> = sprites[username];
+    const { color: currentColor, messages: currentMessages }: Partial<Sprite> = sprites[username];
 
     if (color !== currentColor) {
       sprites[username].color = color;
