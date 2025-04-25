@@ -1,47 +1,33 @@
 <script setup lang="ts">
-import sprites from '@/stores/sprites.ts';
-import messages from '@/stores/messages.ts';
-import { onMounted, ref, watch, useTemplateRef } from 'vue';
-import type { Sprite } from '@/stores/sprites.ts';
+import { watch } from 'vue';
+import sprites from '../stores/sprites';
+import Sprite from './Sprite.vue';
 
-const footer = ref<HTMLElement | null>(null);
-const canvas = useTemplateRef('canvas');
+console.log('sprite controller', sprites.value);
 
-function drawSprite(sprite: Sprite, canvas2d: CanvasRenderingContext2D | null | undefined) {
-  if (!canvas2d || !sprite) return;
-
-  const { assets, size, position } = sprite;
-
-  const assetImg = new Image();
-  assetImg.src = assets.idle;
-  assetImg.width = size;
-  assetImg.height = size;
-
-  canvas2d.drawImage(assetImg, position.x, position.y, size, size);
-}
-
-function drawSprites() {
-  for (const username in sprites) {
-    drawSprite(sprites[username], canvas?.value?.getContext('2d'));
-  }
-}
-
-onMounted(drawSprites);
-watch(() => messages.length, drawSprites, { immediate: true });
+watch(
+    sprites,
+    () => {
+      console.log('sprites changed');
+    },
+    { deep: true },
+);
 </script>
 
 <template>
-  <div ref="footer">
-    <canvas
-      id="sprite-canvas"
-      ref="canvas"
+  <div class="sprites">
+    <Sprite
+      v-for="(value, key) in sprites"
+      :sprite="value"
+      :key="key"
     />
   </div>
-  <img src="/public/sprites/squooshme.avif"
 </template>
 
 <style lang="scss">
-#sprite-canvas {
+.sprites {
+  position: relative;
   width: 100%;
+  height: 100%;
 }
 </style>

@@ -49,7 +49,7 @@ body {
     display: grid;
     grid-template-areas:
       'header header sidebar'
-      'body body sidebar';
+      'footer footer sidebar';
   }
 
   .grid > div:nth-child(1) {
@@ -60,7 +60,7 @@ body {
     position: relative;
     display: grid;
     align-items: end;
-    grid-area: body;
+    grid-area: footer;
   }
 
   .grid > div:nth-child(3) {
