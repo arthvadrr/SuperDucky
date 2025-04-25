@@ -5,21 +5,20 @@ const { sprite } = defineProps<{
   sprite: Sprite;
 }>();
 
-const { username, color, messages, assets, state, speed, size, position } = sprite;
-
-console.log('state', state);
-console.log('sprite', sprite);
+const { assets, state, size, deltaX } = sprite;
 </script>
 
 <template>
   <div class="sprite">
+    <h1>{{ deltaX }}</h1>
     <img
       class="ducky-image"
       alt="Ducky!"
-      :src="assets[state]"
+      :src="assets[state.key]"
       :style="{
-        left: `${position.x}px`,
+        left: `${sprite.position.x}px`,
         width: `${size}px`,
+        transform: `scale(${sprite.deltaX}, 1)`,
       }"
     />
   </div>
