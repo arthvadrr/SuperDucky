@@ -2,6 +2,7 @@ import sprites from '@/stores/sprites.ts';
 import messages from '@/stores/messages.ts';
 import { io, Socket } from 'socket.io-client';
 import type { Sprite } from '@/stores/sprites.ts';
+import type { SpriteStateKey } from '@/stores/sprites.ts';
 
 /**
  * Connect to the socket server quack
@@ -13,12 +14,11 @@ const socket: Socket = io(
 /**
  * Static asset paths
  */
-const spriteAssets: Record<'idle' | 'walk' | 'talk', string> = {
+const spriteAssets: Record<SpriteStateKey, string> = {
   idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
   walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
   talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-}
-
+};
 /**
  * Listen for messages
  */
@@ -34,16 +34,19 @@ socket.on('message', (ctx): void => {
       color: color,
       messages: [messageText],
       assets: spriteAssets,
-      state: 'walk',
+      state: {
+        key: 'walk',
+        isPausedTimeout: null,
+        isPausedDuration: 0
+      },
       size: Math.random() * (100 - 50) + 50,
-      speed: Math.random() * (2 - 0.5) + 0.5,
+      speed: Math.random() * (0.1 - 0.01) + 0.01,
+      deltaX: 1,
       position: { x: 0, y: 0 },
-    }
+      animation: null
+    };
   } else {
-    const {
-      color: currentColor,
-      messages: currentMessages
-    }: Partial<Sprite> = sprites[username];
+    const { color: currentColor, messages: currentMessages }: Partial<Sprite> = sprites[username];
 
     if (color !== currentColor) {
       sprites[username].color = color;

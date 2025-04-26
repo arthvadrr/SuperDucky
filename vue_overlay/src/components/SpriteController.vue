@@ -1,47 +1,93 @@
 <script setup lang="ts">
-import sprites from '@/stores/sprites.ts';
-import messages from '@/stores/messages.ts';
-import { onMounted, ref, watch, useTemplateRef } from 'vue';
-import type { Sprite } from '@/stores/sprites.ts';
+import { watch, watchEffect, useTemplateRef, ref, onBeforeUnmount } from 'vue';
+import sprites from '../stores/sprites';
+import Sprite from './Sprite.vue';
+import SpriteAnimation from '@/classes/SpriteAnimation.ts';
 
-const footer = ref<HTMLElement | null>(null);
-const canvas = useTemplateRef('canvas');
+const spritesTemplateRef = useTemplateRef<HTMLElement | null>('sprites');
+const boundingClientRectWidth = ref<number>(0);
 
-function drawSprite(sprite: Sprite, canvas2d: CanvasRenderingContext2D | null | undefined) {
-  if (!canvas2d || !sprite) return;
-
-  const { assets, size, position } = sprite;
-
-  const assetImg = new Image();
-  assetImg.src = assets.idle;
-  assetImg.width = size;
-  assetImg.height = size;
-
-  canvas2d.drawImage(assetImg, position.x, position.y, size, size);
-}
-
-function drawSprites() {
-  for (const username in sprites) {
-    drawSprite(sprites[username], canvas?.value?.getContext('2d'));
+watchEffect(() => {
+  if (spritesTemplateRef.value) {
+    boundingClientRectWidth.value = spritesTemplateRef.value.getBoundingClientRect().width;
   }
+});
+
+let animationFrameId: number;
+
+function animate() {
+  if (Object.entries(sprites).length > 0) {
+    for (const username in sprites) {
+      if (sprites[username].state.isPausedTimeout) {
+        if (sprites[username].state.key !== 'idle') {
+          sprites[username].state.key = 'idle';
+        }
+
+        continue;
+      }
+
+      if (!sprites[username]?.animation) {
+        sprites[username].animation = new SpriteAnimation({
+          posX: sprites[username].position.x ?? 0,
+          deltaX: 1,
+          speed: sprites[username].speed ?? 1,
+          bounds: { start: 0, end: boundingClientRectWidth.value },
+        });
+      }
+
+      const result = sprites[username].animation.animations[sprites[username].state.key]();
+      sprites[username].position.x = result.posX;
+      sprites[username].deltaX = result.deltaX;
+
+      const shouldFlip = Math.random() < 0.000289;
+
+      if (shouldFlip) {
+        sprites[username].state.isPausedTimeout = setTimeout(
+          () => {
+            sprites[username].state.isPausedTimeout = null;
+            sprites[username].state.key = 'walk';
+          },
+          Math.random() * (16000 - 8000) + 8000,
+        );
+      }
+    }
+  }
+
+  animationFrameId = requestAnimationFrame(animate);
 }
 
-onMounted(drawSprites);
-watch(() => messages.length, drawSprites, { immediate: true });
+watch(
+  () => Object.entries(sprites).length,
+  () => {
+    animationFrameId = requestAnimationFrame(animate);
+  },
+  { immediate: true },
+);
+
+onBeforeUnmount(() => {
+  cancelAnimationFrame(animationFrameId);
+});
 </script>
 
 <template>
-  <div ref="footer">
-    <canvas
-      id="sprite-canvas"
-      ref="canvas"
-    />
+  <div
+    class="sprites"
+    ref="sprites"
+  >
+    <div v-if="Object.entries(sprites).length">
+      <Sprite
+        v-for="(value, key) in sprites"
+        :sprite="value"
+        :key="key"
+      />
+    </div>
   </div>
-  <img src="/public/sprites/squooshme.avif"
 </template>
 
 <style lang="scss">
-#sprite-canvas {
+.sprites {
+  position: relative;
   width: 100%;
+  height: 100%;
 }
 </style>
