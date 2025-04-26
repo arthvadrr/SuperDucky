@@ -73,14 +73,13 @@ onBeforeUnmount(() => {
   <div
     class="sprites"
     ref="sprites"
+    v-if="Object.entries(sprites).length"
   >
-    <div v-if="Object.entries(sprites).length">
-      <Sprite
-        v-for="(value, key) in sprites"
-        :sprite="value"
-        :key="key"
-      />
-    </div>
+    <Sprite
+      v-for="(value, key) in sprites"
+      :sprite="value"
+      :key="key"
+    />
   </div>
 </template>
 
