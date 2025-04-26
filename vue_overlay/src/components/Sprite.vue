@@ -1,23 +1,34 @@
 <script setup lang="ts">
 import type { Sprite } from '@/stores/sprites.ts';
 
-const { sprite } = defineProps<{
+defineProps<{
   sprite: Sprite;
 }>();
-
-const { assets, state, size, deltaX } = sprite;
 </script>
 
 <template>
-  <div class="sprite">
-    <h1>{{ deltaX }}</h1>
+  <div
+    class="sprite-container"
+    :style="{
+      left: `${sprite.position.x}px`,
+    }"
+  >
+    <div class="nameplate-container">
+      <div
+        class="nameplate"
+        :style="{
+          color: sprite.color,
+        }"
+      >
+        {{ sprite.username }}
+      </div>
+    </div>
     <img
-      class="ducky-image"
+      class="sprite"
       alt="Ducky!"
-      :src="assets[state.key]"
+      :src="sprite.assets[sprite.state.key]"
       :style="{
-        left: `${sprite.position.x}px`,
-        width: `${size}px`,
+        width: `${Math.round(sprite.size)}px`,
         transform: `scale(${sprite.deltaX}, 1)`,
       }"
     />
@@ -25,8 +36,28 @@ const { assets, state, size, deltaX } = sprite;
 </template>
 
 <style scoped lang="scss">
-.sprite .ducky-image {
+.sprite-container,
+.ducky-image {
   position: absolute;
   bottom: 0;
+}
+
+.sprite-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sprite {
+  position: relative;
+  vertical-align: bottom;
+}
+
+.nameplate-container {
+  padding: 2px 8px;
+  background: rgba(#18181c, 0.85);
+  font-size: 14px;
+  margin-bottom: 8px;
+  border: 1px solid #000;
 }
 </style>
