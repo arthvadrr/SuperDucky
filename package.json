@@ -23,7 +23,7 @@
     "url": "https://github.com/arthvadrr/SuperDucky/issues"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix overlay\"",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix vue_overlay\"",
     "build": "concurrently \"npm run dev --prefix server\" \"npm run build --prefix overlay\"",
     "preview": "concurrently \"npm run dev --prefix server\" \"npm run preview --prefix overlay\"",
     "serve": "concurrently \"npm run dev --prefix server\" \"npm run build --prefix overlay && npm run preview --prefix overlay\"",
