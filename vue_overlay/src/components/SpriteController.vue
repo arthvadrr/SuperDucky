@@ -7,6 +7,9 @@ import SpriteAnimation from '@/classes/SpriteAnimation.ts';
 const spritesTemplateRef = useTemplateRef<HTMLElement | null>('sprites');
 const boundingClientRectWidth = ref<number>(0);
 
+/**
+ * Need to check for bounds in the grid item
+ */
 watchEffect(() => {
   if (spritesTemplateRef.value) {
     boundingClientRectWidth.value = spritesTemplateRef.value.getBoundingClientRect().width;
@@ -15,7 +18,10 @@ watchEffect(() => {
 
 let animationFrameId: number;
 
-function animate() {
+/**
+ * Our animation Loop. Controls the active sprite animation on class SpriteAnimation
+ */
+function spriteAnimationLoop() {
   if (Object.entries(sprites).length > 0) {
     for (const username in sprites) {
       if (sprites[username].state.isPausedTimeout) {
@@ -53,13 +59,16 @@ function animate() {
     }
   }
 
-  animationFrameId = requestAnimationFrame(animate);
+  animationFrameId = requestAnimationFrame(spriteAnimationLoop);
 }
 
+/**
+ * Sync animations to browser frames
+ */
 watch(
   () => Object.entries(sprites).length,
   () => {
-    animationFrameId = requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(spriteAnimationLoop);
   },
   { immediate: true },
 );

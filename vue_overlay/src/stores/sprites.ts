@@ -15,6 +15,8 @@ export interface SpriteState {
   key: SpriteStateKey,
   isPausedTimeout: any | null;
   isPausedDuration: number;
+  isShowingMessageTimeout: any | null;
+  isShowingMessage: boolean;
 }
 
 export interface Sprite {
@@ -44,7 +46,7 @@ export function initMockSprites(count: number = 5): Sprites {
     result[username] = {
       username,
       color: `#fff`,
-      messages: [`Hello from ${username}`],
+      messages: [],
       assets: {
         idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
         walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
@@ -53,7 +55,9 @@ export function initMockSprites(count: number = 5): Sprites {
       state: {
         key: 'walk',
         isPausedTimeout: null,
-        isPausedDuration: 0
+        isPausedDuration: 0,
+        isShowingMessageTimeout: null,
+        isShowingMessage: false,
       },
       speed: Math.random() * (0.5 - 0.1) + 0.1,
       size: Math.random() * (100 - 50) + 50,
