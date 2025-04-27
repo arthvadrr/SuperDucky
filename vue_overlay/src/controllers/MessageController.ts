@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import type { Sprite } from '@/stores/sprites.ts';
 import type { SpriteStateKey } from '@/stores/sprites.ts';
 import { getHueRotateAmount } from '@/util/getHueRotateAmount.ts';
+import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 
 /**
  * Connect to the socket server quack
@@ -24,7 +25,16 @@ const spriteAssets: Record<SpriteStateKey, string> = {
  * Listen for messages
  */
 socket.on('message', (ctx): void => {
-  const { username, messageText, color } = ctx;
+  const { username, messageText } = ctx;
+  let color, bgColor;
+
+  if (ctx.color) {
+    color = ctx.color;
+    bgColor = ctx.color;
+  } else {
+    color = getRandomHexColor();
+    bgColor = getRandomHexColor()
+  }
 
   /**
    * Create or update sprites
@@ -33,7 +43,7 @@ socket.on('message', (ctx): void => {
     sprites[username] = {
       username: username,
       color: color,
-      hueRotate: getHueRotateAmount(color),
+      hueRotate: getHueRotateAmount(bgColor),
       messages: [messageText],
       assets: spriteAssets,
       state: {

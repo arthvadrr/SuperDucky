@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { watch } from 'vue';
 import type { Sprite } from '@/stores/sprites.ts';
-import { getHueFromHex, getHueRotateAmount } from '@/util/getHueRotateAmount.ts';
 
 const { sprite } = defineProps<{
   sprite: Sprite;
