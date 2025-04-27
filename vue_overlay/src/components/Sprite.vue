@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { watch } from 'vue';
 import type { Sprite } from '@/stores/sprites.ts';
+import { getHueFromHex, getHueRotateAmount } from '@/util/getHueRotateAmount.ts';
 
 const { sprite } = defineProps<{
   sprite: Sprite;
@@ -62,13 +63,14 @@ watch(
         {{ sprite.username }}
       </div>
     </div>
-    <img
+    <div
       class="sprite"
-      alt="Ducky!"
-      :src="sprite.assets[sprite.state.key]"
       :style="{
         width: `${Math.round(sprite.size)}px`,
+        height: `${Math.round(sprite.size)}px`,
         transform: `scale(${sprite.deltaX}, 1)`,
+        backgroundImage: `url(${sprite.assets[sprite.state.key]})`,
+        filter: `hue-rotate(${sprite.hueRotate}deg)`
       }"
     />
   </div>
@@ -88,6 +90,7 @@ watch(
     font-size: 14px;
     margin-bottom: 8px;
     border: 1px solid #000;
+    border-radius: 4px;
   }
 
   .chat-bubble-container {
@@ -127,6 +130,9 @@ watch(
   .sprite {
     position: relative;
     vertical-align: bottom;
+    background-size: contain;
+    background-position: bottom;
+    background-repeat: no-repeat;
   }
 }
 </style>

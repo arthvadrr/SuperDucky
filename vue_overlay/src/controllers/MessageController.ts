@@ -3,6 +3,7 @@ import messages from '@/stores/messages.ts';
 import { io, Socket } from 'socket.io-client';
 import type { Sprite } from '@/stores/sprites.ts';
 import type { SpriteStateKey } from '@/stores/sprites.ts';
+import { getHueRotateAmount } from '@/util/getHueRotateAmount.ts';
 
 /**
  * Connect to the socket server quack
@@ -32,6 +33,7 @@ socket.on('message', (ctx): void => {
     sprites[username] = {
       username: username,
       color: color,
+      hueRotate: getHueRotateAmount(color),
       messages: [messageText],
       assets: spriteAssets,
       state: {
