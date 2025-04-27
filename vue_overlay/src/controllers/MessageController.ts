@@ -37,10 +37,12 @@ socket.on('message', (ctx): void => {
       state: {
         key: 'walk',
         isPausedTimeout: null,
-        isPausedDuration: 0
+        isPausedDuration: 0,
+        isShowingMessageTimeout: false,
+        isShowingMessage: false
       },
       size: Math.random() * (100 - 50) + 50,
-      speed: Math.random() * (0.1 - 0.01) + 0.01,
+      speed: Math.random() * (0.5 - 0.1) + 0.1,
       deltaX: 1,
       position: { x: 0, y: 0 },
       animation: null
