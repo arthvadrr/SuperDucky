@@ -10,8 +10,6 @@ let socketServer: Server;
 export function initializeSocketServer(httpServer: HTTPServer): void {
   const fesocket = `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_FRONTEND_PORT ?? '3000'}`;
 
-  console.log('SOCKETFE', fesocket);
-
   socketServer = new Server(httpServer, {
     cors: {
       origin: [
