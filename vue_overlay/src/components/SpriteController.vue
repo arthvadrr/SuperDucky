@@ -82,7 +82,6 @@ onBeforeUnmount(() => {
   <div
     class="sprites"
     ref="sprites"
-    v-if="Object.entries(sprites).length"
   >
     <Sprite
       v-for="(value, key) in sprites"
