@@ -1,7 +1,6 @@
 import { reactive } from 'vue';
-import type SpriteAnimation from "@/classes/SpriteAnimation.ts";
-import { getHueRotateAmount } from '@/util/getHueRotateAmount.ts';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
+import type SpriteAnimation from "@/classes/SpriteAnimation.ts";
 
 /**
  * Types and interfaces
@@ -24,7 +23,6 @@ export interface SpriteState {
 export interface Sprite {
   username: string;
   color: string;
-  hueRotate: number;
   messages: string[];
   assets: Record<SpriteStateKey, string>;
   state: SpriteState;
@@ -49,7 +47,6 @@ export function initMockSprites(count: number = 5): Sprites {
     result[username] = {
       username,
       color: getRandomHexColor(),
-      hueRotate: getHueRotateAmount(getRandomHexColor()),
       messages: [],
       assets: {
         idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
@@ -64,7 +61,7 @@ export function initMockSprites(count: number = 5): Sprites {
         isShowingMessage: false,
       },
       speed: Math.random() * (0.5 - 0.1) + 0.1,
-      size: Math.random() * (100 - 50) + 50,
+      size: Math.random() * (150 - 75) + 75,
       position: { x: 0, y: 0 },
       deltaX: 1,
       animation: null,

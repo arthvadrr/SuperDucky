@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { watch } from 'vue';
+import DuckySVG from '@/components/DuckySVG.vue';
 import type { Sprite } from '@/stores/sprites.ts';
 
 const { sprite } = defineProps<{
@@ -28,8 +29,6 @@ watch(
         }, 1000);
       }, readingLength);
     }
-
-    console.log('sprite', sprite);
   },
   { immediate: true },
 );
@@ -62,15 +61,16 @@ watch(
         {{ sprite.username }}
       </div>
     </div>
-    <div
+    <DuckySVG
       class="sprite"
       :style="{
-        width: `${Math.round(sprite.size)}px`,
-        height: `${Math.round(sprite.size)}px`,
-        transform: `scale(${sprite.deltaX}, 1)`,
-        backgroundImage: `url(${sprite.assets[sprite.state.key]})`,
-        filter: `hue-rotate(${sprite.hueRotate}deg)`
+        height: `${sprite.size}px`,
+        width: `${sprite.size}px`,
+        transform: `scale(${sprite.deltaX}, 1)`
       }"
+      :color="sprite.color"
+      :username="sprite.username"
+      :state="sprite.state.key"
     />
   </div>
 </template>
@@ -102,36 +102,49 @@ watch(
     width: 400px;
     height: 600px;
 
-  .chat-bubble {
-    bottom: 0;
-    width: fit-content;
-    padding: 10px 20px;
-    margin-bottom: 5px;
-    color: #000000;
-    background-color: #fff;
-    box-shadow: 5px 5px 1px #000;
-    border: 1px solid #000;
-    border-radius: 15px 15px 15px 0;
-    transform-origin: bottom left;
-    transform: translateY(50px) rotate(45deg) scale(0.1);
-    opacity: 0;
+    .chat-bubble {
+      bottom: 0;
+      width: fit-content;
+      padding: 10px 20px;
+      margin-bottom: 5px;
+      color: #000000;
+      background-color: #fff;
+      box-shadow: 5px 5px 1px #000;
+      border: 1px solid #000;
+      border-radius: 15px 15px 15px 0;
+      transform-origin: bottom left;
+      transform: translateY(50px) rotate(45deg) scale(0.1);
+      opacity: 0;
 
-    &.visible {
-      opacity: 1;
-      transform: translateY(0);
-      transition:
-        transform 600ms cubic-bezier(0.68, -0.55, 0.27, 1.55),
-        opacity 300ms ease-in;
+      &.visible {
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+          transform 600ms cubic-bezier(0.68, -0.55, 0.27, 1.55),
+          opacity 300ms ease-in;
+      }
     }
-  }
   }
 
   .sprite {
     position: relative;
-    vertical-align: bottom;
     background-size: contain;
     background-position: bottom;
     background-repeat: no-repeat;
+    mask-size: contain;
+    mask-position: bottom;
+    mask-repeat: no-repeat;
+    background-blend-mode: color;
+
+    .sprite-mask-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.1;
+    }
   }
 }
 </style>

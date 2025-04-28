@@ -1,10 +1,9 @@
 import sprites from '@/stores/sprites.ts';
 import messages from '@/stores/messages.ts';
 import { io, Socket } from 'socket.io-client';
+import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 import type { Sprite } from '@/stores/sprites.ts';
 import type { SpriteStateKey } from '@/stores/sprites.ts';
-import { getHueRotateAmount } from '@/util/getHueRotateAmount.ts';
-import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 
 /**
  * Connect to the socket server quack
@@ -25,25 +24,17 @@ const spriteAssets: Record<SpriteStateKey, string> = {
  * Listen for messages
  */
 socket.on('message', (ctx): void => {
-  const { username, messageText } = ctx;
-  let color, bgColor;
-
-  if (ctx.color) {
-    color = ctx.color;
-    bgColor = ctx.color;
-  } else {
-    color = getRandomHexColor();
-    bgColor = getRandomHexColor()
-  }
+  const { username, messageText, command, color } = ctx;
 
   /**
    * Create or update sprites
    */
   if (!sprites?.[username]) {
+    const nameColor = color ?? getRandomHexColor();
+
     sprites[username] = {
       username: username,
-      color: color,
-      hueRotate: getHueRotateAmount(bgColor),
+      color: nameColor,
       messages: [messageText],
       assets: spriteAssets,
       state: {
@@ -51,23 +42,23 @@ socket.on('message', (ctx): void => {
         isPausedTimeout: null,
         isPausedDuration: 0,
         isShowingMessageTimeout: false,
-        isShowingMessage: false
+        isShowingMessage: false,
       },
-      size: Math.random() * (100 - 50) + 50,
       speed: Math.random() * (0.5 - 0.1) + 0.1,
-      deltaX: 1,
+      size: Math.random() * (150 - 75) + 75,
       position: { x: 0, y: 0 },
-      animation: null
+      deltaX: 1,
+      animation: null,
     };
   } else {
-    const { color: currentColor, messages: currentMessages }: Partial<Sprite> = sprites[username];
-
-    if (color !== currentColor) {
-      sprites[username].color = color;
-    }
+    const { messages: currentMessages }: Partial<Sprite> = sprites[username];
 
     if (messageText !== currentMessages[currentMessages.length - 1]) {
       sprites[username].messages.push(messageText);
+    }
+
+    if (command === 'color' && color) {
+      sprites[username].color = color;
     }
   }
 
