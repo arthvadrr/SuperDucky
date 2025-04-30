@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { defineProps, computed } from 'vue';
 import type { SpriteStateKey } from '@/stores/sprites.ts';
+import {
+  getRandomEyeBlinkDuration,
+  getRandomFootBounceDuration,
+  getRandomHeadBobDuration,
+  getRandomWingFlapDuration,
+} from '@/util/helpers.ts';
 
 const { color, username, state } = defineProps<{
   color: string;
@@ -11,10 +17,10 @@ const { color, username, state } = defineProps<{
 const isWalking = computed(() => state === 'walk');
 const isIdle = computed(() => state === 'idle');
 
-const footBounceDuration = Math.random() * (0.5 - 0.3) + 0.3;
-const wingFlapDuration = Math.random() * (15 - 8) + 8;
-const headBobDuration = Math.random() * (18 - 12) + 12;
-const eyeBlinkDuration = Math.random() * (12 - 8) + 8;
+const footBounceDuration = getRandomFootBounceDuration();
+const wingFlapDuration = getRandomWingFlapDuration();
+const headBobDuration = getRandomHeadBobDuration();
+const eyeBlinkDuration = getRandomEyeBlinkDuration();
 </script>
 
 <template>

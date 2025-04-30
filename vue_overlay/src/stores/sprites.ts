@@ -1,5 +1,7 @@
 import { reactive } from 'vue';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
+import { DUCKY_ASSETS } from '@/util/constants.ts';
+import { getRandomSpriteSize, getRandomSpriteSpeed } from '@/util/helpers.ts';
 import type SpriteAnimation from "@/classes/SpriteAnimation.ts";
 
 /**
@@ -16,7 +18,7 @@ export interface SpriteState {
   key: SpriteStateKey,
   isPausedTimeout: number | null;
   isPausedDuration: number | null;
-  isShowingMessageTimeout: never | null;
+  isShowingMessageTimeout: number | null;
   isShowingMessage: boolean;
 }
 
@@ -48,11 +50,7 @@ export function initMockSprites(count: number = 5): Sprites {
       username,
       color: getRandomHexColor(),
       messages: [],
-      assets: {
-        idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-        walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-        talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-      },
+      assets: DUCKY_ASSETS,
       state: {
         key: 'walk',
         isPausedTimeout: null,
@@ -60,8 +58,8 @@ export function initMockSprites(count: number = 5): Sprites {
         isShowingMessageTimeout: null,
         isShowingMessage: false,
       },
-      speed: Math.random() * (0.5 - 0.1) + 0.1,
-      size: Math.random() * (150 - 75) + 75,
+      speed: getRandomSpriteSpeed(),
+      size: getRandomSpriteSize(),
       position: { x: 0, y: 0 },
       deltaX: 1,
       animation: null,
@@ -83,11 +81,7 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
         username,
         color: getRandomHexColor(),
         messages: [],
-        assets: {
-          idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-          walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-          talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-        },
+        assets: DUCKY_ASSETS,
         state: {
           key: 'walk',
           isPausedTimeout: null,
@@ -95,8 +89,8 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
           isShowingMessageTimeout: null,
           isShowingMessage: false,
         },
-        speed: Math.random() * (0.3 - 0.1) + 0.1,
-        size: Math.random() * (150 - 75) + 75,
+        speed: getRandomSpriteSpeed(),
+        size: getRandomSpriteSize(),
         position: { x: 0, y: 0 },
         deltaX: 1,
         animation: null,
@@ -111,6 +105,6 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
  */
 export const sprites: Sprites = reactive(initMockSprites(0) as Sprites);
 
-spawnMockSpritesOverTime(20, 400000);
+spawnMockSpritesOverTime(5, 400000);
 
 export default sprites;

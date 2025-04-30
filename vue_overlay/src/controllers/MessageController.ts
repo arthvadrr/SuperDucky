@@ -1,9 +1,10 @@
 import sprites from '@/stores/sprites.ts';
 import messages from '@/stores/messages.ts';
-import { io, Socket } from 'socket.io-client';
+import { DUCKY_ASSETS } from '@/util/constants.ts';
+import { getRandomSpriteSize, getRandomSpriteSpeed } from '@/util/helpers.ts';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
+import { io, type Socket } from 'socket.io-client';
 import type { Sprite } from '@/stores/sprites.ts';
-import type { SpriteStateKey } from '@/stores/sprites.ts';
 
 /**
  * Connect to the socket server quack
@@ -12,14 +13,6 @@ const socket: Socket = io(
   `http://${import.meta.env.VITE_SERVER_HOST ?? 'localhost'}:${import.meta.env.VITE_SERVER_PORT ?? '3099'}`,
 );
 
-/**
- * Static asset paths
- */
-const spriteAssets: Record<SpriteStateKey, string> = {
-  idle: '/sprites/baby-ducky/baby-ducky-idle.webp',
-  walk: '/sprites/baby-ducky/baby-ducky-walk.webp',
-  talk: '/sprites/baby-ducky/baby-ducky-talking.webp',
-};
 /**
  * Listen for messages
  */
@@ -36,7 +29,7 @@ socket.on('message', (ctx): void => {
       username: username,
       color: nameColor,
       messages: [messageText],
-      assets: spriteAssets,
+      assets: DUCKY_ASSETS,
       state: {
         key: 'walk',
         isPausedTimeout: null,
@@ -44,8 +37,8 @@ socket.on('message', (ctx): void => {
         isShowingMessageTimeout: null,
         isShowingMessage: false,
       },
-      speed: Math.random() * (0.3 - 0.1) + 0.1,
-      size: Math.random() * (150 - 75) + 75,
+      speed: getRandomSpriteSpeed(),
+      size: getRandomSpriteSize(),
       position: { x: 0, y: 0 },
       deltaX: 1,
       animation: null,
