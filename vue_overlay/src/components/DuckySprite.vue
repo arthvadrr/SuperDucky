@@ -45,6 +45,7 @@ const { sprite } = defineProps<{
       :color="sprite.color"
       :username="sprite.username"
       :state="sprite.state.key"
+      :size="sprite.size"
     />
   </div>
 </template>
