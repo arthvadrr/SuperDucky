@@ -14,8 +14,8 @@ export interface SpritePosition {
 
 export interface SpriteState {
   key: SpriteStateKey,
-  isPausedTimeout: never | null;
-  isPausedDuration: number;
+  isPausedTimeout: number | null;
+  isPausedDuration: number | null;
   isShowingMessageTimeout: never | null;
   isShowingMessage: boolean;
 }
