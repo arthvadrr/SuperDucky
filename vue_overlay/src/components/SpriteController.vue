@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watch, watchEffect, useTemplateRef, ref, onBeforeUnmount } from 'vue';
 import sprites from '../stores/sprites';
-import Sprite from './Sprite.vue';
+import DuckySprite from './DuckySprite.vue';
 import SpriteAnimation from '@/classes/SpriteAnimation.ts';
 
 const spritesTemplateRef = useTemplateRef<HTMLElement | null>('sprites');
@@ -73,6 +73,29 @@ watch(
   { immediate: true },
 );
 
+watchEffect(() => {
+  for (const username in sprites) {
+    const sprite = sprites[username];
+
+    if (
+      !sprite.state.isShowingMessage &&
+      !sprite.state.isShowingMessageTimeout &&
+      sprite.messages.length > 0
+    ) {
+      const readingLength = sprite.messages[0].split(' ').length * 500 + 5000;
+
+      sprite.state.isShowingMessage = true;
+      sprite.state.isShowingMessageTimeout = setTimeout(() => {
+        sprite.state.isShowingMessage = false;
+        sprite.state.isShowingMessageTimeout = setTimeout(() => {
+          sprite.state.isShowingMessageTimeout = null;
+          sprite.messages.shift();
+        }, 1000);
+      }, readingLength);
+    }
+  }
+});
+
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationFrameId);
 });
@@ -83,7 +106,7 @@ onBeforeUnmount(() => {
     class="sprites"
     ref="sprites"
   >
-    <Sprite
+    <DuckySprite
       v-for="(value, key) in sprites"
       :sprite="value"
       :key="key"

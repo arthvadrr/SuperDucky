@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { watch } from 'vue';
 import DuckySVG from '@/components/DuckySVG.vue';
 import type { Sprite } from '@/stores/sprites.ts';
 
@@ -7,31 +6,6 @@ const { sprite } = defineProps<{
   sprite: Sprite;
 }>();
 
-/**
- * If we don't have a timout going but we have messages, then we need to enqueue our message. Quack.
- */
-watch(
-  () => sprite.messages.length,
-  () => {
-    if (
-      !sprite.state.isShowingMessage &&
-      !sprite.state.isShowingMessageTimeout &&
-      sprite.messages.length > 0
-    ) {
-      const readingLength: number = sprite.messages[0].split(' ').length * 500 + 5000;
-
-      sprite.state.isShowingMessage = true;
-      sprite.state.isShowingMessageTimeout = setTimeout(() => {
-        sprite.state.isShowingMessage = false;
-        sprite.state.isShowingMessageTimeout = setTimeout(() => {
-          sprite.state.isShowingMessageTimeout = null;
-          sprite.messages.shift();
-        }, 1000);
-      }, readingLength);
-    }
-  },
-  { immediate: true },
-);
 </script>
 
 <template>
