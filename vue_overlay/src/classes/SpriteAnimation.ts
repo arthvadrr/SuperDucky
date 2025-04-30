@@ -27,11 +27,11 @@ export default class SpriteAnimation {
     this.speed = speed ?? 1;
     this.bounds = bounds ?? {
       start: 0,
-      end: 0
+      end: 0,
     };
   }
 
-  animations: Record<string, any> = {
+  animations: Record<string, () => AnimationResult> = {
     walk: this.animateWalk.bind(this),
   };
 

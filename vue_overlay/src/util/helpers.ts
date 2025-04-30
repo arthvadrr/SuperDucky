@@ -1,5 +1,6 @@
 import {
-  SPRITE_SPEED,
+  MAX_SPRITE_SPEED,
+  MIN_SPRITE_SPEED,
   MAX_SPRITE_SIZE,
   MIN_SPRITE_SIZE,
   FOOT_BOUNCE_DURATION,
@@ -41,7 +42,7 @@ export const getRandomSpriteSize = (): number =>
   Math.random() * (MAX_SPRITE_SIZE - MIN_SPRITE_SIZE) + MIN_SPRITE_SIZE;
 
 export const getSpriteSpeed = (size: number): number =>
-  SPRITE_SPEED * getPercSize(size, true);
+  (Math.random() * (MAX_SPRITE_SPEED - MIN_SPRITE_SPEED) + MIN_SPRITE_SPEED) * getPercSize(size, true);
 
 export const getFootBounceDuration = (size: number): number =>
   FOOT_BOUNCE_DURATION * (getPercSize(size) + 1);

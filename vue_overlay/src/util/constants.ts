@@ -1,4 +1,5 @@
-export const SPRITE_SPEED: number = 0.5;
+export const MAX_SPRITE_SPEED: number = 0.5;
+export const MIN_SPRITE_SPEED: number = 0.3;
 export const MIN_SPRITE_SIZE: number = 75;
 export const MAX_SPRITE_SIZE: number = 150;
 export const MAX_WING_FLAP_DURATION: number = 16;
