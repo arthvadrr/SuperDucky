@@ -21,7 +21,7 @@ const isTalking = computed(() => state === 'talk');
 const footBounceDuration = getFootBounceDuration(size);
 const wingFlapDuration = getRandomWingFlapDuration(size);
 const headBobDuration = getRandomHeadBobDuration(size);
-const eyeBlinkDuration = getEyeBlinkDuration(size);
+const eyeBlinkDuration = getEyeBlinkDuration();
 </script>
 
 <template>
@@ -221,7 +221,7 @@ const eyeBlinkDuration = getEyeBlinkDuration(size);
   </svg>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 .walkingLeft {
   position: absolute;
   animation: footBounce 200ms infinite;

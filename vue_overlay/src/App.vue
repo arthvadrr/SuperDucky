@@ -1,17 +1,17 @@
 <template>
   <main class="scaffold">
     <div class="grid">
-      <Header />
-      <Footer />
-      <Sidebar />
+      <OverlayHeader />
+      <OverlayFooter />
+      <OverlaySidebar />
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import Header from './components/Header.vue'
-import Footer from './components/Footer.vue'
-import Sidebar from './components/Sidebar.vue'
+import OverlayHeader from './components/OverlayHeader.vue'
+import OverlayFooter from './components/OverlayFooter.vue'
+import OverlaySidebar from './components/OverlaySidebar.vue'
 import './controllers/MessageController'
 
 </script>

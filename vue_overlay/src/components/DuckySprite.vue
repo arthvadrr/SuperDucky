@@ -13,6 +13,7 @@ const { sprite } = defineProps<{
     class="sprite-container"
     :style="{
       left: `${sprite.position.x}px`,
+      zIndex: sprite.state.key === 'talk' ? 100 : 1,
     }"
   >
     <div class="chat-bubble-container">
@@ -59,11 +60,10 @@ const { sprite } = defineProps<{
   bottom: 0;
 
   .nameplate-container {
-    padding: 2px 8px;
-    background: rgba(#18181c, 0.85);
-    font-size: 14px;
+    padding: 4px 12px;
+    background-color: #18181c;
+    font-size: 16px;
     margin-bottom: 8px;
-    border: 1px solid #000;
     border-radius: 4px;
   }
 
@@ -84,6 +84,7 @@ const { sprite } = defineProps<{
       margin-bottom: 5px;
       color: #000000;
       background-color: #fff;
+      font-size: 16px;
       box-shadow: 5px 5px 1px #000;
       border: 1px solid #000;
       border-radius: 15px 15px 15px 0;
