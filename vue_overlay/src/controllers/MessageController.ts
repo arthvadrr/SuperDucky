@@ -1,7 +1,6 @@
 import sprites from '@/stores/sprites.ts';
 import messages from '@/stores/messages.ts';
-import { DUCKY_ASSETS } from '@/util/constants.ts';
-import { getRandomSpriteSize, getRandomSpriteSpeed } from '@/util/helpers.ts';
+import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 import { io, type Socket } from 'socket.io-client';
 import type { Sprite } from '@/stores/sprites.ts';
@@ -19,6 +18,9 @@ const socket: Socket = io(
 socket.on('message', (ctx): void => {
   const { username, messageText, command, color } = ctx;
 
+  const size: number = getRandomSpriteSize();
+  const speed: number = getSpriteSpeed(size);
+
   /**
    * Create or update sprites
    */
@@ -29,7 +31,6 @@ socket.on('message', (ctx): void => {
       username: username,
       color: nameColor,
       messages: [messageText],
-      assets: DUCKY_ASSETS,
       state: {
         key: 'walk',
         isPausedTimeout: null,
@@ -37,8 +38,8 @@ socket.on('message', (ctx): void => {
         isShowingMessageTimeout: null,
         isShowingMessage: false,
       },
-      speed: getRandomSpriteSpeed(),
-      size: getRandomSpriteSize(),
+      size: size,
+      speed: speed,
       position: { x: 0, y: 0 },
       deltaX: 1,
       animation: null,

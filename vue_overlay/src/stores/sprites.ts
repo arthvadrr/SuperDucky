@@ -1,7 +1,6 @@
 import { reactive } from 'vue';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
-import { DUCKY_ASSETS } from '@/util/constants.ts';
-import { getRandomSpriteSize, getRandomSpriteSpeed } from '@/util/helpers.ts';
+import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
 import type SpriteAnimation from "@/classes/SpriteAnimation.ts";
 
 /**
@@ -26,7 +25,6 @@ export interface Sprite {
   username: string;
   color: string;
   messages: string[];
-  assets: Record<SpriteStateKey, string>;
   state: SpriteState;
   speed: number;
   size: number;
@@ -42,6 +40,11 @@ export type Sprites = Record<string, Sprite>;
  */
 export function initMockSprites(count: number = 5): Sprites {
   const result: Sprites = {};
+  const size: number = getRandomSpriteSize();
+  const speed: number = getSpriteSpeed(size);
+
+  console.log('size', size);
+  console.log('speed', speed);
 
   for (let i: number = 0; i < count; i++) {
     const username: string = `mockuser${i}`;
@@ -50,7 +53,6 @@ export function initMockSprites(count: number = 5): Sprites {
       username,
       color: getRandomHexColor(),
       messages: [],
-      assets: DUCKY_ASSETS,
       state: {
         key: 'walk',
         isPausedTimeout: null,
@@ -58,8 +60,8 @@ export function initMockSprites(count: number = 5): Sprites {
         isShowingMessageTimeout: null,
         isShowingMessage: false,
       },
-      speed: getRandomSpriteSpeed(),
-      size: getRandomSpriteSize(),
+      size: size,
+      speed: speed,
       position: { x: 0, y: 0 },
       deltaX: 1,
       animation: null,
@@ -73,15 +75,19 @@ export function initMockSprites(count: number = 5): Sprites {
  * Utility to spawn mock sprites staggered over a duration
  */
 export function spawnMockSpritesOverTime(count: number, durationMs: number = 5000): void {
-  for (let i = 0; i < count; i++) {
+  for (let i: number = 0; i < count; i++) {
     setTimeout(() => {
-      const username = `mockuser_${Date.now()}_${i}`;
+      const username: string = `mockuser_${Date.now()}_${i}`;
+      const size: number = getRandomSpriteSize();
+      const speed: number = getSpriteSpeed(size);
+
+      console.log('size', size);
+      console.log('speed', speed);
 
       sprites[username] = {
         username,
         color: getRandomHexColor(),
         messages: [],
-        assets: DUCKY_ASSETS,
         state: {
           key: 'walk',
           isPausedTimeout: null,
@@ -89,8 +95,8 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
           isShowingMessageTimeout: null,
           isShowingMessage: false,
         },
-        speed: getRandomSpriteSpeed(),
-        size: getRandomSpriteSize(),
+        size: size,
+        speed: speed,
         position: { x: 0, y: 0 },
         deltaX: 1,
         animation: null,

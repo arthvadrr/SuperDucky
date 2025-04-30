@@ -2,25 +2,26 @@
 import { defineProps, computed } from 'vue';
 import type { SpriteStateKey } from '@/stores/sprites.ts';
 import {
-  getRandomEyeBlinkDuration,
-  getRandomFootBounceDuration,
+  getEyeBlinkDuration,
+  getFootBounceDuration,
   getRandomHeadBobDuration,
   getRandomWingFlapDuration,
 } from '@/util/helpers.ts';
 
-const { color, username, state } = defineProps<{
+const { color, username, state, size } = defineProps<{
   color: string;
   username: string;
   state: SpriteStateKey;
+  size: number;
 }>();
 
 const isWalking = computed(() => state === 'walk');
 const isIdle = computed(() => state === 'idle');
-
-const footBounceDuration = getRandomFootBounceDuration();
-const wingFlapDuration = getRandomWingFlapDuration();
-const headBobDuration = getRandomHeadBobDuration();
-const eyeBlinkDuration = getRandomEyeBlinkDuration();
+const isTalking = computed(() => state === 'talk');
+const footBounceDuration = getFootBounceDuration(size);
+const wingFlapDuration = getRandomWingFlapDuration(size);
+const headBobDuration = getRandomHeadBobDuration(size);
+const eyeBlinkDuration = getEyeBlinkDuration(size);
 </script>
 
 <template>
@@ -67,7 +68,7 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
       <g id="Body">
         <path
           id="Right-Wing"
-          :class="{flappingRight: isWalking || isIdle}"
+          :class="{ flappingRight: isWalking || isIdle || isTalking }"
           d="M63.693,66.441c-0.077,3.972 -2.205,5.721 -4.553,6.053c-5.093,0.249 -18.614,-7.792 -19.747,-11.944c-1.574,-5.171 1.539,-7.238 10.044,-5.736c3.033,0.499 4.036,2.522 3.937,5.372c-0,0 -0.318,-5.371 3.353,-5.439l5.413,0.247c1.438,0.02 6.133,-0.354 7,2c0.637,4.632 -4.56,3.254 -5.447,9.447Z"
           :fill="`url(#_linear_${username})`"
           stroke-width="2px"
@@ -83,7 +84,7 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
         />
         <path
           id="Left-Wing"
-          :class="{flappingLeft: isWalking || isIdle}"
+          :class="{ flappingLeft: isWalking || isIdle || isTalking }"
           d="M25.553,65.946c-0.077,3.973 -2.204,5.721 -4.553,6.054c-5.093,0.249 -18.613,-7.792 -19.747,-11.945c-1.573,-5.17 1.539,-7.238 10.044,-5.735c3.034,0.499 4.036,2.522 3.937,5.372c0,-0 -0.318,-5.371 3.354,-5.44l5.412,0.248c1.438,0.019 6.133,-0.354 7,2c0.637,4.631 -4.559,3.254 -5.447,9.446Z"
           :fill="`url(#_linear_${username})`"
           stroke-width="2px"
@@ -93,7 +94,7 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
       </g>
       <g
         id="HeadGroup"
-        :class="{ walkingHead: isWalking }"
+        :class="{ bobHead: isWalking }"
         :style="{ animationDuration: `${headBobDuration}s` }"
       >
         <path
@@ -107,7 +108,7 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
           <path
             id="Right-Eye"
             d="M57.228,24.057l6.33,0.04c-0.101,1.396 0.736,2.188 2.587,2.327l-0.02,9.31c-2.113,-0.091 -2.822,0.611 -2.682,1.793l-5.54,0.068c0.113,-1.758 -0.926,-2.263 -2.603,-2.073l-0.059,-9.219c1.52,0.137 2.201,-0.592 1.987,-2.246Z"
-            :class="{blinkingEye: isWalking || isIdle}"
+            :class="{ blinkingEye: isWalking || isIdle || isTalking }"
             :style="{ animationDuration: `${eyeBlinkDuration}s` }"
           />
           <clipPath id="_clip7">
@@ -119,13 +120,13 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
             <path
               d="M60.456,26.312l3.02,0.069l0.057,3.241l-3.033,-0.218l-0.044,-3.092Z"
               fill="#fff"
-              :class="{blinkingEye: isWalking || isIdle}"
+              :class="{ blinkingEye: isWalking || isIdle || isTalking }"
               :style="{ animationDuration: `${eyeBlinkDuration}s` }"
             />
           </g>
           <path
             id="Left-Eye"
-            :class="{blinkingEye: isWalking || isIdle}"
+            :class="{ blinkingEye: isWalking || isIdle || isTalking }"
             d="M33.14,26.46l8.056,0.05c-0.098,1.897 0.81,2.96 3.023,2.938l0.065,8.918c-2.42,-0.267 -3.395,0.831 -3.084,3.141l-7.83,-0.108c0.244,-2.058 -0.611,-3.146 -2.885,-2.982l0.024,-9.029c1.699,-0.044 2.616,-0.755 2.631,-2.928Z"
             :style="{ animationDuration: `${eyeBlinkDuration}s` }"
           />
@@ -139,7 +140,7 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
             <path
               d="M37.946,29.269l3.106,0.065l0.011,3.321l-3.084,-0.119l-0.033,-3.267Z"
               fill="#fff"
-              :class="{blinkingEye: isWalking || isIdle}"
+              :class="{ blinkingEye: isWalking || isIdle || isTalking }"
               :style="{ animationDuration: `${eyeBlinkDuration}s` }"
             />
           </g>
@@ -148,24 +149,10 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
           <path
             id="Beak-Lower"
             d="M49.616,48.866c-2,-0.63 -3.992,-3.784 -2.585,-5.397c0.275,-1.592 4.995,-2.322 5.215,0.193c-0.198,2.459 3.12,3.028 6.188,1.619c0.02,1.452 -0.724,3.195 -2.271,3.907c-1.979,0.777 -4.3,0.409 -6.547,-0.322Z"
-            style="fill: none"
+            fill="#df8926"
             stroke="#000"
-          />
-          <clipPath id="_clip9">
-            <path
-              d="M49.616,48.866c-2,-0.63 -3.992,-3.784 -2.585,-5.397c0.275,-1.592 4.995,-2.322 5.215,0.193c-0.198,2.459 3.12,3.028 6.188,1.619c0.02,1.452 -0.724,3.195 -2.271,3.907c-1.979,0.777 -4.3,0.409 -6.547,-0.322Z"
-            />
-          </clipPath>
-          <g clip-path="url(#_clip9)">
-            <path
-              d="M47.339,46.586l0.026,-4.229l4.91,0.099l-0.002,2.596l5.292,0.094l-0.003,4.144l-8.591,0.008l-1.632,-2.712Z"
-              style="fill: #df8926"
-              stroke="#000"
-            />
-          </g>
-          <path
-            d="M49.616,48.866c-2,-0.63 -3.992,-3.784 -2.585,-5.397c0.275,-1.592 4.995,-2.322 5.215,0.193c-0.198,2.459 3.12,3.028 6.188,1.619c0.02,1.452 -0.724,3.195 -2.271,3.907c-1.979,0.777 -4.3,0.409 -6.547,-0.322Z"
-            style="fill: none; stroke-width: 2px"
+            stroke-width="2px"
+            :class="{ beakTalking: isTalking }"
           />
           <path
             id="Beak-Upper"
@@ -173,16 +160,11 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
             style="fill: #df8926"
             stroke="#000"
           />
-          <clipPath id="_clip10">
-            <path
-              id="Beak-Upper1"
-              d="M46.333,41.355c1.978,-1 4.339,-1.395 5.187,-3.56c1.852,-3.885 5.934,-1.367 7.034,-0.505c0.935,0.545 5.249,-0.187 7.193,1.17c2.494,2.029 -0.758,2.877 -2.385,3.387c-2.074,0.854 -2.69,3.014 -4.165,3.02l-12.814,-0.061c-3.127,0.072 -1.998,-2.608 -0.05,-3.451Z"
-            />
-          </clipPath>
           <g clip-path="url(#_clip10)">
             <path
               d="M53.926,38.297l0.36,0.878l1.151,0.143l-0.343,-0.743l-1.168,-0.278Z"
-              style="fill: none; stroke-width: 2px"
+              stroke-width="1px"
+              stroke="#000"
             />
           </g>
           <path
@@ -259,7 +241,7 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
   transform-origin: center;
 }
 
-.walkingHead {
+.bobHead {
   animation: headBob 10s infinite;
   transform-origin: center;
 }
@@ -272,6 +254,11 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
 .flappingLeft {
   animation: leftFlap 10s infinite;
   transform-origin: center;
+}
+
+.beakTalking {
+  animation: beakTalk 2s infinite;
+  transform-origin: top left;
 }
 
 @keyframes footBounce {
@@ -298,32 +285,60 @@ const eyeBlinkDuration = getRandomEyeBlinkDuration();
 }
 
 @keyframes headBob {
-  0%, 19%, 80%, 100% {
+  0%,
+  19%,
+  80%,
+  100% {
     transform: translateY(0) rotate(0);
   }
-  20%, 39% {
+  20%,
+  39% {
     transform: translateY(5px) rotate(-10deg);
   }
-  40%, 79% {
+  40%,
+  79% {
     transform: translateY(5px) rotate(10deg);
   }
 }
 
 @keyframes leftFlap {
-  0%, 48%, 52%, 53%  {
+  0%,
+  48%,
+  52%,
+  53% {
     transform: rotate(0);
   }
-  49%, 51% {
+  49%,
+  51% {
     transform: rotate(20deg);
   }
 }
 
 @keyframes rightFlap {
-  0%, 48%, 52%, 53%  {
+  0%,
+  48%,
+  52%,
+  53% {
     transform: rotate(0);
   }
-  49%, 51% {
+  49%,
+  51% {
     transform: rotate(-20deg);
+  }
+}
+
+@keyframes beakTalk {
+  0%,
+  10%,
+  20%,
+  30%,
+  100% {
+    transform: rotate(0);
+  }
+  5%,
+  15%,
+  25% {
+    transform: rotate(1deg);
   }
 }
 </style>

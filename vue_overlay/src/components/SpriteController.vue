@@ -41,20 +41,22 @@ function spriteAnimationLoop() {
         });
       }
 
-      const result = sprites[username].animation.animations[sprites[username].state.key]();
-      sprites[username].position.x = result.posX;
-      sprites[username].deltaX = result.deltaX;
+      if (sprites[username].state.key === 'walk') {
+        const result = sprites[username].animation.animations[sprites[username].state.key]();
+        sprites[username].position.x = result.posX;
+        sprites[username].deltaX = result.deltaX;
 
-      const shouldFlip = Math.random() < 0.000289;
+        const shouldFlip = Math.random() < 0.000289;
 
-      if (shouldFlip) {
-        sprites[username].state.isPausedTimeout = setTimeout(
-          () => {
-            sprites[username].state.isPausedTimeout = null;
-            sprites[username].state.key = 'walk';
-          },
-          Math.random() * (25000 - 16000) + 16000,
-        );
+        if (shouldFlip) {
+          sprites[username].state.isPausedTimeout = setTimeout(
+            () => {
+              sprites[username].state.isPausedTimeout = null;
+              sprites[username].state.key = 'walk';
+            },
+            Math.random() * (25000 - 16000) + 16000,
+          );
+        }
       }
     }
   }
@@ -83,11 +85,14 @@ watchEffect(() => {
       sprite.messages.length > 0
     ) {
       const readingLength = sprite.messages[0].split(' ').length * 500 + 5000;
+      const prevState = sprite.state.key;
 
+      sprite.state.key = 'talk';
       sprite.state.isShowingMessage = true;
       sprite.state.isShowingMessageTimeout = setTimeout(() => {
         sprite.state.isShowingMessage = false;
         sprite.state.isShowingMessageTimeout = setTimeout(() => {
+          sprite.state.key = prevState;
           sprite.state.isShowingMessageTimeout = null;
           sprite.messages.shift();
         }, 1000);
