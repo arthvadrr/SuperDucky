@@ -17,4 +17,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    port: Number(process.env.VITE_FRONTEND_PORT) || 5199,
+  },
+  preview: {
+    port: Number(process.env.VITE_FRONTEND_PORT) || 5199,
+  },
 })

@@ -73,12 +73,20 @@ export async function startDucky(): Promise<void> {
     },
   );
 
-  const userId = await authProvider.addUserForToken(tokenData);
+  const userId: string = await authProvider.addUserForToken(tokenData);
   authProvider.addIntentsToUser(userId, ['chat']);
 
   console.log('Joining channel...', process.env.VITE_TWITCH_CHANNEL);
 
-  async function emitDuckyBotMessage(ctx: MessageEvent, messageText: string): Promise<void> {
+  interface EmitDuckyBotMessageProps {
+    ctx: MessageEvent;
+    messageText: string;
+  }
+
+  async function emitDuckyBotMessage({
+    ctx,
+    messageText,
+  }: EmitDuckyBotMessageProps): Promise<void> {
     await ctx.reply(messageText);
 
     setTimeout(() => {
@@ -103,23 +111,41 @@ export async function startDucky(): Promise<void> {
     let command: string = '';
 
     if (messageText.startsWith('!')) {
-      const [ctxCommand] = messageText.slice(1).split(' ');
+      const [ctxCommand, ...args] = messageText.slice(1).split(' ');
 
-      if (ctxCommand === 'walk' || ctxCommand === 'stop') {
-        await emitDuckyBotMessage(
-          ctx,
-          `quack! 🐥 ${ctxCommand} @${ctx.userDisplayName}`,
-        );
+      if (ctxCommand === 'color') {
+        if (args.length === 1 && /^#?[0-9A-Fa-f]{6}$/.test(args[0])) {
+          getSocketServer().emit('message', {
+            messageText: `Updated to ${args[0]}`,
+            color: args[0],
+            command: ctxCommand,
+            username: ctx.userDisplayName ?? '',
+          });
+
+
+        } else if (args[0]?.toLowerCase() === 'unset') {
+          getSocketServer().emit('message', {
+            messageText,
+            color,
+            command: ctxCommand,
+            username: ctx.userDisplayName ?? '',
+          });
+        } else {
+          await ctx.reply(`@${ctx.userDisplayName} Please provide a valid ducking hex color (e.g. #FFD94E).`)
+        }
       }
+
+      if (ctxCommand === 'commands') {
+        await ctx.reply('Change ducky color with "!color {hexValue}"');
+      }
+    } else {
+      getSocketServer().emit('message', {
+        command,
+        color,
+        messageText,
+        username: ctx.userDisplayName ?? '',
+      });
     }
-
-
-    getSocketServer().emit('message', {
-      command,
-      color,
-      messageText,
-      username: ctx.userDisplayName ?? '',
-    });
   });
 
   /**

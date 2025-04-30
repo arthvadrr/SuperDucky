@@ -199,7 +199,7 @@ function Sprite({
     let timerId: NodeJS.Timeout;
 
     if (!isPaused) {
-      const pauseAfter = Math.random() * 20000 + 1000;
+      const pauseAfter = Math.random() * (10000 - 5000) + 5000;
       timerId = setTimeout(() => {
         setIsPaused(true);
       }, pauseAfter);

@@ -53,7 +53,7 @@ function spriteAnimationLoop() {
             sprites[username].state.isPausedTimeout = null;
             sprites[username].state.key = 'walk';
           },
-          Math.random() * (16000 - 8000) + 8000,
+          Math.random() * (25000 - 16000) + 16000,
         );
       }
     }
@@ -82,7 +82,6 @@ onBeforeUnmount(() => {
   <div
     class="sprites"
     ref="sprites"
-    v-if="Object.entries(sprites).length"
   >
     <Sprite
       v-for="(value, key) in sprites"

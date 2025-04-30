@@ -14,6 +14,7 @@ SuperDucky is my Twitch bot!
 - Helix emotes
 - !lore command
 - Possible ideas (custom chat buble, custom text color and effect, custom duck skins, accessoires, hats, different size)
+- dynamic nameplate background color
 
 ## Project Structure
 

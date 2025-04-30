@@ -93,8 +93,6 @@ export function SpriteProvider({ children }: { children: ReactNode }) {
 
       for (const username in users) {
         const { color, messages } = users[username];
-        
-        console.log('up', updated);
 
         if (updated?.[username]) {
           updated[username].messages = messages;
