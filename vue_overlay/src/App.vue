@@ -42,7 +42,6 @@ body {
 }
 
 .scaffold {
-  background-color: #111;
   height: 100vh;
 
   .grid {

@@ -95,7 +95,7 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
           isShowingMessageTimeout: null,
           isShowingMessage: false,
         },
-        speed: Math.random() * (0.5 - 0.1) + 0.1,
+        speed: Math.random() * (0.3 - 0.1) + 0.1,
         size: Math.random() * (150 - 75) + 75,
         position: { x: 0, y: 0 },
         deltaX: 1,
