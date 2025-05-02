@@ -6,8 +6,6 @@ SuperDucky is my Twitch bot!
 
 ## TODO
 
-- Chat bubbles
-- Handle message profanity
 - Handle user gets banned
 - Handle user timeout (fun ideas...)
 - Hatch and grow feature
@@ -15,6 +13,7 @@ SuperDucky is my Twitch bot!
 - !lore command
 - Possible ideas (custom chat buble, custom text color and effect, custom duck skins, accessoires, hats, different size)
 - dynamic nameplate background color
+- !followage
 
 ## Project Structure
 
