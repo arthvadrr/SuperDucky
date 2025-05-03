@@ -13,6 +13,7 @@ import OverlayHeader from './components/OverlayHeader.vue'
 import OverlayFooter from './components/OverlayFooter.vue'
 import OverlaySidebar from './components/OverlaySidebar.vue'
 import './controllers/MessageController'
+import './controllers/SpriteController'
 
 </script>
 

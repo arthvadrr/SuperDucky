@@ -8,3 +8,4 @@ export const MAX_HEAD_BOB_DURATION: number = 16;
 export const MIN_HEAD_BOB_DURATION: number = 12;
 export const FOOT_BOUNCE_DURATION: number = 0.2;
 export const EYE_BLINK_DURATION: number = 12;
+export const EXPIRATION_DURATION: number = 3_600_000;

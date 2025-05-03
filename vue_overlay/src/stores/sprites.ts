@@ -1,6 +1,7 @@
 import { reactive } from 'vue';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
+import { EXPIRATION_DURATION } from '@/util/constants.ts';
 import type SpriteAnimation from "@/classes/SpriteAnimation.ts";
 
 /**
@@ -19,6 +20,7 @@ export interface SpriteState {
   isPausedDuration: number | null;
   isShowingMessageTimeout: number | null;
   isShowingMessage: boolean;
+  expiration: number;
 }
 
 export interface Sprite {
@@ -43,9 +45,6 @@ export function initMockSprites(count: number = 5): Sprites {
   const size: number = getRandomSpriteSize();
   const speed: number = getSpriteSpeed(size);
 
-  console.log('size', size);
-  console.log('speed', speed);
-
   for (let i: number = 0; i < count; i++) {
     const username: string = `mockuser${i}`;
 
@@ -59,6 +58,7 @@ export function initMockSprites(count: number = 5): Sprites {
         isPausedDuration: 0,
         isShowingMessageTimeout: null,
         isShowingMessage: false,
+        expiration: Date.now() + EXPIRATION_DURATION,
       },
       size: size,
       speed: speed,
@@ -94,6 +94,7 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
           isPausedDuration: 0,
           isShowingMessageTimeout: null,
           isShowingMessage: false,
+          expiration: Date.now() + EXPIRATION_DURATION,
         },
         size: size,
         speed: speed,

@@ -28,7 +28,6 @@ function spriteAnimationLoop() {
         if (sprites[username].state.key !== 'idle') {
           sprites[username].state.key = 'idle';
         }
-
         continue;
       }
 
