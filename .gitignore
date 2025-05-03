@@ -34,3 +34,8 @@ Thumbs.db
 
 # Coverage reports (if using tests)
 coverage/
+
+# Misc
+excerpts.txt
+excerpts_revised.txt
+server/super_ducky.db
