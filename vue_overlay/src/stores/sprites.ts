@@ -3,6 +3,7 @@ import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
 import { EXPIRATION_DURATION } from '@/util/constants.ts';
 import type SpriteAnimation from "@/classes/SpriteAnimation.ts";
+import type { Message } from '@/stores/messages.ts';
 
 /**
  * Types and interfaces
@@ -26,7 +27,7 @@ export interface SpriteState {
 export interface Sprite {
   username: string;
   color: string;
-  messages: string[];
+  messages: Message[];
   state: SpriteState;
   speed: number;
   size: number;
@@ -81,9 +82,6 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
       const size: number = getRandomSpriteSize();
       const speed: number = getSpriteSpeed(size);
 
-      console.log('size', size);
-      console.log('speed', speed);
-
       sprites[username] = {
         username,
         color: getRandomHexColor(),
@@ -112,6 +110,6 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
  */
 export const sprites: Sprites = reactive(initMockSprites(0) as Sprites);
 
-spawnMockSpritesOverTime(5, 400000);
+spawnMockSpritesOverTime(10, 400000);
 
 export default sprites;

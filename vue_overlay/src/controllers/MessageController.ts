@@ -1,9 +1,11 @@
 import sprites from '@/stores/sprites.ts';
 import messages from '@/stores/messages.ts';
-import { EXPIRATION_DURATION } from '@/util/constants.ts';
+import getReadingLength from '@/util/getReadingLength.ts';
 import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
+import { EXPIRATION_DURATION } from '@/util/constants.ts';
 import { socket } from '@/socket.ts';
+import type { Message } from '@/stores/messages.ts';
 import type { Sprite } from '@/stores/sprites.ts';
 
 /**
@@ -15,16 +17,20 @@ socket.on('message', (ctx): void => {
   const size: number = getRandomSpriteSize();
   const speed: number = getSpriteSpeed(size);
 
+  const message: Message = {
+    messageText: messageText,
+    readingLength: getReadingLength(messageText),
+  };
+
   /**
    * Create or update sprites
    */
   if (!sprites?.[username]) {
     const nameColor = color ?? getRandomHexColor();
-
     sprites[username] = {
       username: username,
       color: nameColor,
-      messages: [messageText],
+      messages: [message],
       state: {
         key: 'walk',
         isPausedTimeout: null,
@@ -59,17 +65,10 @@ socket.on('message', (ctx): void => {
       }
 
       /**
-       * Store the message in the history
+       * Store the message in both message and sprite history
        */
-      messages.push({
-        messageText: messageText,
-        username: username,
-      });
-
-      /**
-       * Add the message to the sprite's history
-       */
-      sprites[username].messages.push(messageText);
+      messages.push(message);
+      sprites[username].messages.push(message);
     }
 
     /**

@@ -3,6 +3,7 @@ import { watch, watchEffect, useTemplateRef, ref, onBeforeUnmount } from 'vue';
 import sprites from '../stores/sprites';
 import DuckySprite from './DuckySprite.vue';
 import SpriteAnimation from '@/classes/SpriteAnimation.ts';
+import getReadingLength from '@/util/getReadingLength.ts';
 
 const spritesTemplateRef = useTemplateRef<HTMLElement | null>('sprites');
 const boundingClientRectWidth = ref<number>(0);
@@ -83,7 +84,9 @@ watchEffect(() => {
       !sprite.state.isShowingMessageTimeout &&
       sprite.messages.length > 0
     ) {
-      const readingLength = sprite.messages[0].split(' ').length * 500 + 5000;
+      console.log('in watch effect', sprite);
+
+      const readingLength = getReadingLength(sprite.messages[0].messageText);
       const prevState = sprite.state.key;
 
       sprite.state.key = 'talk';
