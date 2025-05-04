@@ -1,3 +1,4 @@
+export const FONT_SIZE: string = '18px';
 export const MAX_SPRITE_SPEED: number = 0.5;
 export const MIN_SPRITE_SPEED: number = 0.3;
 export const MIN_SPRITE_SIZE: number = 75;
@@ -7,4 +8,10 @@ export const MIN_WING_FLAP_DURATION: number = 12;
 export const MAX_HEAD_BOB_DURATION: number = 16;
 export const MIN_HEAD_BOB_DURATION: number = 12;
 export const FOOT_BOUNCE_DURATION: number = 0.2;
-export const EYE_BLINK_DURATION: number = 12;
+export const EYE_BLINK_DURATION_MAX: number = 18;
+export const EYE_BLINK_DURATION_MIN: number = 12;
+export const EXPIRATION_DURATION: number = 3_600_000;
+export const EXCERPT_DURATION: number = 20000;
+export const EXCERPT_DELAY: number = 1000;
+export const READING_BASE_DURATION: number = 8000;
+export const READING_DURATION_MULTIPLIER: number = 600;

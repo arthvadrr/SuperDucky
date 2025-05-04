@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import SpriteController from './SpriteController.vue';
+import DuckySprites from './DuckySprites.vue';
 </script>
 
 <template>
   <div class="footer">
-  <SpriteController />
+  <DuckySprites />
   </div>
 </template>
 

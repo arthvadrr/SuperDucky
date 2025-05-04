@@ -1,20 +1,22 @@
+<script setup lang="ts">
+import OverlayHeader from './components/OverlayHeader.vue'
+import OverlayFooter from './components/OverlayFooter.vue'
+import OverlaySidebar from './components/OverlaySidebar.vue'
+import './controllers/MessageController'
+import './controllers/SpriteController'
+import './controllers/ExcerptController.ts'
+import { FONT_SIZE } from '@/util/constants.ts';
+</script>
+
 <template>
   <main class="scaffold">
-    <div class="grid">
+    <div class="grid" :style="{ fontSize: FONT_SIZE }">
       <OverlayHeader />
       <OverlayFooter />
       <OverlaySidebar />
     </div>
   </main>
 </template>
-
-<script setup lang="ts">
-import OverlayHeader from './components/OverlayHeader.vue'
-import OverlayFooter from './components/OverlayFooter.vue'
-import OverlaySidebar from './components/OverlaySidebar.vue'
-import './controllers/MessageController'
-
-</script>
 
 <style scoped lang="scss">
 @font-face {
@@ -47,6 +49,7 @@ body {
   .grid {
     height: 100%;
     display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas:
       'header header sidebar'
       'footer footer sidebar';
@@ -54,6 +57,7 @@ body {
 
   .grid > div:nth-child(1) {
     grid-area: header;
+
   }
 
   .grid > div:nth-child(2) {

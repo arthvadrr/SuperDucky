@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import DuckySVG from '@/components/DuckySVG.vue';
+import DurationBar from '@/components/DurationBar.vue';
 import type { Sprite } from '@/stores/sprites.ts';
 
 const { sprite } = defineProps<{
   sprite: Sprite;
 }>();
-
 </script>
 
 <template>
@@ -23,7 +23,16 @@ const { sprite } = defineProps<{
           visible: sprite.state.isShowingMessage,
         }"
       >
-        {{ sprite.messages?.[0] ?? '' }}
+        <div
+          class="chat-bubble-inner"
+          v-if="sprite.state.isShowingMessage"
+        >
+          <DurationBar
+            :duration="sprite.messages?.[0].readingLength"
+            :height="5"
+          />
+          <p class="chat-bubble-message">{{ sprite.messages?.[0].messageText ?? '' }}</p>
+        </div>
       </div>
     </div>
     <div class="nameplate-container">
@@ -41,7 +50,7 @@ const { sprite } = defineProps<{
       :style="{
         height: `${sprite.size}px`,
         width: `${sprite.size}px`,
-        transform: `scale(${sprite.deltaX}, 1)`
+        transform: `scale(${sprite.deltaX}, 1)`,
       }"
       :color="sprite.color"
       :username="sprite.username"
@@ -62,7 +71,6 @@ const { sprite } = defineProps<{
   .nameplate-container {
     padding: 4px 12px;
     background-color: #18181c;
-    font-size: 16px;
     margin-bottom: 8px;
     border-radius: 4px;
   }
@@ -80,16 +88,15 @@ const { sprite } = defineProps<{
     .chat-bubble {
       bottom: 0;
       width: fit-content;
-      padding: 10px 20px;
       margin-bottom: 5px;
       color: #000000;
       background-color: #fff;
-      font-size: 16px;
       box-shadow: 5px 5px 1px #000;
       border: 1px solid #000;
-      border-radius: 15px 15px 15px 0;
+      border-radius: 10px 10px 10px 0;
       transform-origin: bottom left;
       transform: translateY(50px) rotate(45deg) scale(0.1);
+      overflow: hidden;
       opacity: 0;
 
       &.visible {
@@ -98,6 +105,12 @@ const { sprite } = defineProps<{
         transition:
           transform 600ms cubic-bezier(0.68, -0.55, 0.27, 1.55),
           opacity 300ms ease-in;
+      }
+
+      .chat-bubble-message {
+        margin: 0;
+        border-top: 1px solid #000;
+        padding: 12px;
       }
     }
   }

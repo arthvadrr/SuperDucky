@@ -29,12 +29,14 @@
     "@twurple/eventsub-ws": "^7.2.1",
     "@types/tmi.js": "^1.8.6",
     "axios": "^1.8.4",
+    "better-sqlite3": "^11.9.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
     "tmi.js": "^1.8.5"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.1",
     "@types/node": "^22.13.13",
     "typescript": "^5.8.2"

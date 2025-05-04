@@ -1,11 +1,12 @@
+import path from 'path';
+import dotenv from 'dotenv';
+import { getSocketServer } from './socket';
 import { promises as fs } from 'fs';
 import { ApiClient } from '@twurple/api';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
-import { getSocketServer } from './socket';
 import { MessageEvent } from '@twurple/easy-bot';
 import { Bot } from '@twurple/easy-bot';
-import dotenv from 'dotenv';
-import path from 'path';
+import type Excerpt from "./types/Excerpt";
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.server.local') });
 dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
@@ -59,7 +60,7 @@ export async function startDucky(): Promise<void> {
    * Handles writing the refreshed token to tokens.json
    */
   authProvider.onRefresh(
-    async (userId: string, newTokenData: AccessToken): Promise<void> => {
+    async (_: string, newTokenData: AccessToken): Promise<void> => {
       try {
         await fs.writeFile(
           tokenPath,
@@ -83,6 +84,14 @@ export async function startDucky(): Promise<void> {
     messageText: string;
   }
 
+  /**
+   * Set Interval to purge users
+   */
+  setInterval((): void => {
+    getSocketServer().emit('purge');
+  }, 10000);
+
+
   async function emitDuckyBotMessage({
     ctx,
     messageText,
@@ -105,6 +114,9 @@ export async function startDucky(): Promise<void> {
 
   const apiClient = new ApiClient({ authProvider });
 
+  /**
+   * Handles a message from the chat
+   */
   bot.onMessage(async (ctx: MessageEvent): Promise<void> => {
     const messageText: string = String(ctx.text);
     const color: string = (await apiClient.chat.getColorForUser(ctx.userId)) ?? '';
@@ -112,6 +124,28 @@ export async function startDucky(): Promise<void> {
 
     if (messageText.startsWith('!')) {
       const [ctxCommand, ...args] = messageText.slice(1).split(' ');
+
+      if (ctxCommand === 'duckylore') {
+
+        try {
+          const excerpt_res: Response = await fetch(`http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`);
+
+          console.log('GOT RES');
+          
+          console.log(excerpt_res);
+
+          if (excerpt_res.ok) {
+            const excerpt: Excerpt = await excerpt_res.json();
+            
+            console.log('emiiting: ', JSON.stringify(excerpt));
+
+            getSocketServer().emit('excerpt', { excerpt });
+          }
+        } catch (error) {
+          console.error('Failed to fetch excerpt:', error);
+          return;
+        }
+      }
 
       if (ctxCommand === 'color') {
         if (args.length === 1 && /^#?[0-9A-Fa-f]{6}$/.test(args[0])) {
@@ -136,7 +170,7 @@ export async function startDucky(): Promise<void> {
       }
 
       if (ctxCommand === 'commands') {
-        await ctx.reply('Change ducky color with "!color {hexValue}"');
+        await ctx.reply('!color {hexValue}, !duckylore');
       }
     } else {
       getSocketServer().emit('message', {
