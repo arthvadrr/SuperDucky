@@ -40,3 +40,5 @@ coverage/
 **/excerpts_revised.txt
 **/super_ducky.db
 **/excerpts_*.sql
+*.db
+**/*.db
