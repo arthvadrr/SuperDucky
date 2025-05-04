@@ -6,23 +6,10 @@ import { ApiClient } from '@twurple/api';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { MessageEvent } from '@twurple/easy-bot';
 import { Bot } from '@twurple/easy-bot';
-import { Excerpt } from "./api/v1/router";
+import type Excerpt from "./types/Excerpt";
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.server.local') });
 dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
-
-function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&comma;/g, ',')
-    .replace(/&apos;/g, '\'')
-    .replace(/&ndash;/g, '-')
-}
 
 export async function startDucky(): Promise<void> {
   const clientId: string = process.env.CLIENT_ID ?? '';
@@ -139,19 +126,24 @@ export async function startDucky(): Promise<void> {
       const [ctxCommand, ...args] = messageText.slice(1).split(' ');
 
       if (ctxCommand === 'duckylore') {
-        const excerpt_res: Response = await fetch(`http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`);
 
-        if (excerpt_res.ok) {
-          const excerpt: Excerpt = await excerpt_res.json();
+        try {
+          const excerpt_res: Response = await fetch(`http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`);
 
-          const messageText: string = `
-          ${decodeHtmlEntities(excerpt?.book_excerpt ?? '')}
+          console.log('GOT RES');
           
-          – ${excerpt?.book_title}, by ${excerpt?.book_author}, ${excerpt?.book_author_role} ${excerpt?.book_author_race}`
+          console.log(excerpt_res);
 
-          await emitDuckyBotMessage({ ctx, messageText })
+          if (excerpt_res.ok) {
+            const excerpt: Excerpt = await excerpt_res.json();
+            
+            console.log('emiiting: ', JSON.stringify(excerpt));
 
-          console.log(`Excerpt: ${JSON.stringify(excerpt)}`);
+            getSocketServer().emit('excerpt', { excerpt });
+          }
+        } catch (error) {
+          console.error('Failed to fetch excerpt:', error);
+          return;
         }
       }
 

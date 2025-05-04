@@ -1,21 +1,16 @@
 import db from '../../db/sqlite';
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import type Excerpt from "../../types/Excerpt";
+
 
 const router: Router = Router();
 
-export type Excerpt = {
-  id: number
-  book_title: string
-  book_excerpt: string
-  book_author: string
-  book_author_race: string
-  book_author_role: string
-} | undefined;
-
 router.get('/excerpts-count', async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = (await db.prepare('SELECT COUNT(*) AS excerpt_count FROM excerpts').get()) as { excerpt_count: number } | undefined;
+    const result = (await db.prepare('SELECT COUNT(*) AS excerpt_count FROM excerpts').get()) as {
+      excerpt_count: number
+    } | undefined;
 
     if (!result) {
       res.status(404).json({ error: 'No excerpts found' });
@@ -32,17 +27,15 @@ router.get('/excerpts-count', async (req: Request, res: Response): Promise<void>
 router.get('/random-excerpt', async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await db.prepare(`
-  SELECT 
-    id, 
-    book_title,
-    book_excerpt, 
-    book_author, 
-    book_author_race,
-    book_author_role
-  FROM excerpts 
-  ORDER BY RANDOM() 
-  LIMIT 1
-`).get() as Excerpt;
+        SELECT id,
+               book_title,
+               book_excerpt,
+               book_author,
+               book_author_race,
+               book_author_role
+        FROM excerpts
+        ORDER BY RANDOM() LIMIT 1
+    `).get() as Excerpt;
 
     if (!result) {
       res.status(404).json({ error: 'No excerpts found' });
