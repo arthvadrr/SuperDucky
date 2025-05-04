@@ -14,6 +14,7 @@ SuperDucky is my Twitch bot!
 - Possible ideas (custom chat buble, custom text color and effect, custom duck skins, accessoires, hats, different size)
 - dynamic nameplate background color
 - !followage
+- sql:setup on clone for db
 
 ## Project Structure
 

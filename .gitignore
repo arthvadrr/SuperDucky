@@ -36,6 +36,7 @@ Thumbs.db
 coverage/
 
 # Misc
-excerpts.txt
-excerpts_revised.txt
-server/super_ducky.db
+**/excerpts.txt
+**/excerpts_revised.txt
+**/super_ducky.db
+**/excerpts_*.sql
