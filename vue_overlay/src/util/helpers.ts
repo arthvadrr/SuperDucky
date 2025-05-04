@@ -8,7 +8,8 @@ import {
   MIN_WING_FLAP_DURATION,
   MAX_HEAD_BOB_DURATION,
   MIN_HEAD_BOB_DURATION,
-  EYE_BLINK_DURATION,
+  EYE_BLINK_DURATION_MAX,
+  EYE_BLINK_DURATION_MIN,
 } from '@/util/constants.ts';
 
 /**
@@ -42,7 +43,8 @@ export const getRandomSpriteSize = (): number =>
   Math.random() * (MAX_SPRITE_SIZE - MIN_SPRITE_SIZE) + MIN_SPRITE_SIZE;
 
 export const getSpriteSpeed = (size: number): number =>
-  (Math.random() * (MAX_SPRITE_SPEED - MIN_SPRITE_SPEED) + MIN_SPRITE_SPEED) * getPercSize(size, true);
+  (Math.random() * (MAX_SPRITE_SPEED - MIN_SPRITE_SPEED) + MIN_SPRITE_SPEED) *
+  getPercSize(size, true);
 
 export const getFootBounceDuration = (size: number): number =>
   FOOT_BOUNCE_DURATION * (getPercSize(size) + 1);
@@ -55,4 +57,5 @@ export const getRandomHeadBobDuration = (size: number): number =>
   (Math.random() * (MAX_HEAD_BOB_DURATION - MIN_HEAD_BOB_DURATION) + MIN_HEAD_BOB_DURATION) *
   (getPercSize(size) + 1);
 
-export const getEyeBlinkDuration = (): number => EYE_BLINK_DURATION;
+export const getEyeBlinkDuration = (): number =>
+  Math.random() * (EYE_BLINK_DURATION_MAX - EYE_BLINK_DURATION_MIN) + EYE_BLINK_DURATION_MIN;
