@@ -125,6 +125,7 @@ const { sprite } = defineProps<{
     mask-repeat: no-repeat;
     background-blend-mode: color;
     transform-origin: center;
+    overflow: visible;
 
     .sprite-mask-overlay {
       position: absolute;

@@ -32,19 +32,10 @@ const eyeBlinkDuration = getEyeBlinkDuration();
     viewBox="0 0 74 92"
     xmlns="http://www.w3.org/2000/svg"
     fill-rule="evenodd"
-    clip-rule="evenodd"
     stroke-linecap="round"
     stroke-miterlimit="2"
   >
-    <clipPath id="_clip1">
-      <rect
-        x="0"
-        y="0"
-        width="73.5"
-        height="91.35"
-      />
-    </clipPath>
-    <g clip-path="url(#_clip1)">
+    <g>
       <g id="Feet">
         <path
           id="Left-Foot"
@@ -111,12 +102,7 @@ const eyeBlinkDuration = getEyeBlinkDuration();
             :class="{ blinkingEye: isWalking || isIdle || isTalking }"
             :style="{ animationDuration: `${eyeBlinkDuration}s` }"
           />
-          <clipPath id="_clip7">
-            <path
-              d="M57.228,24.057l6.33,0.04c-0.101,1.396 0.736,2.188 2.587,2.327l-0.02,9.31c-2.113,-0.091 -2.822,0.611 -2.682,1.793l-5.54,0.068c0.113,-1.758 -0.926,-2.263 -2.603,-2.073l-0.059,-9.219c1.52,0.137 2.201,-0.592 1.987,-2.246Z"
-            />
-          </clipPath>
-          <g clip-path="url(#_clip7)">
+          <g>
             <path
               d="M60.456,26.312l3.02,0.069l0.057,3.241l-3.033,-0.218l-0.044,-3.092Z"
               fill="#fff"
@@ -130,13 +116,7 @@ const eyeBlinkDuration = getEyeBlinkDuration();
             d="M33.14,26.46l8.056,0.05c-0.098,1.897 0.81,2.96 3.023,2.938l0.065,8.918c-2.42,-0.267 -3.395,0.831 -3.084,3.141l-7.83,-0.108c0.244,-2.058 -0.611,-3.146 -2.885,-2.982l0.024,-9.029c1.699,-0.044 2.616,-0.755 2.631,-2.928Z"
             :style="{ animationDuration: `${eyeBlinkDuration}s` }"
           />
-          <clipPath id="_clip8">
-            <path
-              id="Left-Eye1"
-              d="M33.14,26.46l8.056,0.05c-0.098,1.897 0.81,2.96 3.023,2.938l0.065,8.918c-2.42,-0.267 -3.395,0.831 -3.084,3.141l-7.83,-0.108c0.244,-2.058 -0.611,-3.146 -2.885,-2.982l0.024,-9.029c1.699,-0.044 2.616,-0.755 2.631,-2.928Z"
-            />
-          </clipPath>
-          <g clip-path="url(#_clip8)">
+          <g>
             <path
               d="M37.946,29.269l3.106,0.065l0.011,3.321l-3.084,-0.119l-0.033,-3.267Z"
               fill="#fff"
@@ -160,7 +140,7 @@ const eyeBlinkDuration = getEyeBlinkDuration();
             style="fill: #df8926"
             stroke="#000"
           />
-          <g clip-path="url(#_clip10)">
+          <g>
             <path
               d="M53.926,38.297l0.36,0.878l1.151,0.143l-0.343,-0.743l-1.168,-0.278Z"
               stroke-width="1px"

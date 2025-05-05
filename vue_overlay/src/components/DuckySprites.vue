@@ -146,62 +146,60 @@ function spriteAnimationLoop(): void {
     return;
   }
 
-  const spritesContainer = spritesTemplateRef.value;
+  const updatedElements: Map<string, AnimationResult> = new Map();
 
-  if (!spritesContainer) {
-    return;
-  }
+  spriteElements.forEach((_, username) => {
+    const sprite = sprites[username];
 
-  for (const [username, spriteElement] of spriteElements) {
-    const sprite: Sprite = sprites[username];
-    if (!sprite) {
-      continue;
-    }
-
-    if (sprite.state.isPausedTimeout) {
-      if (sprite.state.key !== 'idle') {
-        sprite.state.key = 'idle';
-      }
-      continue;
-    }
+    if (!sprite) return;
 
     const animation = spriteAnimations.get(username);
-    if (!animation) {
-      continue;
+
+    if (!animation) return;
+
+    const result = animation.animateWalk();
+
+    /**
+     * Batched updates to DOM and sprite state
+     */
+    updatedElements.set(username, result);
+
+    /**
+     * Pause the sprite if it's not moving (sometimes they change direction, too!)
+     */
+    const shouldFlip = Math.random() < 0.00029;
+
+    if (shouldFlip) {
+      const timeoutId = setTimeout(() => {
+        sprite.state.isPausedTimeout = null;
+        sprite.state.key = 'walk';
+        pendingTimeouts.delete(username);
+      }, Math.random() * (25000 - 16000) + 16000);
+      sprite.state.isPausedTimeout = timeoutId;
+      pendingTimeouts.set(username, timeoutId);
+    }
+  });
+
+  /**
+   * Apply all batched updates to DOM and sprite state
+   */
+  updatedElements.forEach(({ posX, deltaX }, username) => {
+    const spriteElement = spriteElements.get(username);
+
+    if (spriteElement) {
+      spriteElement.style.transform = `translateX(${posX}px)`;
     }
 
-    if (sprite.state.key === 'walk') {
-      /**
-       * Update position using SpriteAnimation
-       */
-      const result: AnimationResult = animation.animations.walk();
-      spriteElement.style.transform = `translateX(${result.posX}px)`;
-      sprite.deltaX = result.deltaX;
-      sprite.position.x = result.posX;
+    sprites[username].position.x = posX;
+    sprites[username].deltaX = deltaX;
+  });
 
-      /**
-       * Randomly flip the sprite (sometimes they like to change direction!)
-       * Then handle pausing the sprite for a random amount of time
-       */
-      const shouldFlip = Math.random() < 0.000289;
-
-      if (shouldFlip) {
-        const timeoutId = setTimeout(
-          () => {
-            sprite.state.isPausedTimeout = null;
-            sprite.state.key = 'walk';
-            pendingTimeouts.delete(username);
-          },
-          Math.random() * (25000 - 16000) + 16000,
-        );
-        sprite.state.isPausedTimeout = timeoutId;
-        pendingTimeouts.set(username, timeoutId);
-      }
-    }
-  }
-
+  /**
+   * Request next animation frame
+   */
   animationFrameId = requestAnimationFrame(spriteAnimationLoop);
 }
+
 
 /**
  * Sync animations to browser frames
