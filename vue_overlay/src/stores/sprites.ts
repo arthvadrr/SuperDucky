@@ -113,6 +113,6 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
  */
 export const sprites: Sprites = reactive(initMockSprites(0) as Sprites);
 
-spawnMockSpritesOverTime(200, 30_000);
+spawnMockSpritesOverTime(50, 10_000);
 
 export default sprites;

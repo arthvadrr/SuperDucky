@@ -157,24 +157,37 @@ function spriteAnimationLoop(): void {
 
     if (!animation) return;
 
+    /**
+     * If the sprite is paused, skip animation logic
+     */
+    if (sprite.state.key === 'idle') return;
+
     const result = animation.animateWalk();
 
     /**
-     * Batched updates to DOM and sprite state
+     * Store the result for later
      */
     updatedElements.set(username, result);
 
     /**
-     * Pause the sprite if it's not moving (sometimes they change direction, too!)
+     * Randomly pause the sprite's movement for a while
      */
-    const shouldFlip = Math.random() < 0.00029;
+    const shouldPause = Math.random() < 0.002; // Adjust probability as needed
 
-    if (shouldFlip) {
+    if (shouldPause) {
+      const pauseDuration = Math.random() * (25000 - 16000) + 16000; // 16-25s pause
+
+      /**
+       * Pause the sprite for a while
+       */
+      sprite.state.key = 'idle';
+
       const timeoutId = setTimeout(() => {
         sprite.state.isPausedTimeout = null;
-        sprite.state.key = 'walk';
+        sprite.state.key = 'walk'; // Resume walking
         pendingTimeouts.delete(username);
-      }, Math.random() * (25000 - 16000) + 16000);
+      }, pauseDuration);
+
       sprite.state.isPausedTimeout = timeoutId;
       pendingTimeouts.set(username, timeoutId);
     }
