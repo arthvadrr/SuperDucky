@@ -127,7 +127,7 @@ function spriteAnimationLoop(): void {
       spriteAnimations.set(
         username,
         new SpriteAnimation({
-          posX: sprite.position!.x,
+          posX: sprite.position.x,
           deltaX: 1,
           speed: sprite.speed ?? 1,
           bounds: {
@@ -149,7 +149,8 @@ function spriteAnimationLoop(): void {
       /**
        * Update DOM with animation result
        */
-      spriteElement.style.transform = `translateX(${result.posX}px) scaleX(${result.deltaX})`;
+      spriteElement.style.transform = `translateX(${result.posX}px)`;
+      sprite.deltaX = result.deltaX;
 
       /**
        * Randomly flip the sprite (sometimes they like to change direction!)

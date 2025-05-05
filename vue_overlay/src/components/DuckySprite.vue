@@ -49,6 +49,7 @@ const { sprite } = defineProps<{
       :style="{
         height: `${sprite.size}px`,
         width: `${sprite.size}px`,
+        transform: `scaleX(${sprite.deltaX})`,
       }"
       :color="sprite.color"
       :username="sprite.username"
@@ -123,6 +124,7 @@ const { sprite } = defineProps<{
     mask-position: bottom;
     mask-repeat: no-repeat;
     background-blend-mode: color;
+    transform-origin: center;
 
     .sprite-mask-overlay {
       position: absolute;
