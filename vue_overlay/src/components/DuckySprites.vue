@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, watchEffect, useTemplateRef, ref, onBeforeUnmount, onMounted, nextTick } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
 import sprites from '../stores/sprites';
 import DuckySprite from './DuckySprite.vue';
 import SpriteAnimation from '@/classes/SpriteAnimation.ts';
@@ -69,15 +69,21 @@ watch(spritesTemplateRef, (newValue) => {
 watch(
   () => sprites,
   async (newSprites) => {
-    // Wait for next tick to ensure DOM is updated
+    /**
+     * Wait for next tick to ensure DOM is updated
+     */
     await nextTick();
 
-    // Wait for container to be available
+    /**
+     * No container ref yet, so we can't do anything
+     */
     if (!spritesTemplateRef.value) {
       return;
     }
 
-    // Find new sprites
+    /**
+     * Find new sprites
+     */
     Object.entries(newSprites).forEach(([username, sprite]) => {
       if (!spriteElements.has(username)) {
         const spriteElement = spritesTemplateRef.value?.querySelector(
@@ -87,13 +93,17 @@ watch(
         if (spriteElement) {
           spriteElements.set(username, spriteElement);
 
-          // Initialize sprite state
+          /**
+           * Set initial state to walk
+           */
           sprite.state.key = 'walk';
           if (!sprite.position) {
             sprite.position = { x: 0, y: 0 };
           }
 
-          // Initialize animation
+          /**
+           * Create new animation if one doesn't exist.
+           */
           if (!spriteAnimations.has(username)) {
             spriteAnimations.set(
               username,
@@ -112,8 +122,10 @@ watch(
       }
     });
 
-    // Find removed sprites
-    spriteElements.forEach((element, username) => {
+    /**
+     * Find removed sprites
+     */
+    spriteElements.forEach((_, username) => {
       if (!newSprites[username]) {
         spriteElements.delete(username);
         spriteAnimations.delete(username);
@@ -132,6 +144,7 @@ function spriteAnimationLoop(): void {
   }
 
   const spritesContainer = spritesTemplateRef.value;
+
   if (!spritesContainer) {
     return;
   }
@@ -159,12 +172,7 @@ function spriteAnimationLoop(): void {
        * Update position using SpriteAnimation
        */
       const result: AnimationResult = animation.animations.walk();
-
-      /**
-       * Update DOM with animation result
-       */
-      const transform = `translateX(${result.posX}px)`;
-      spriteElement.style.transform = transform;
+      spriteElement.style.transform = `translateX(${result.posX}px)`;
       sprite.deltaX = result.deltaX;
       sprite.position.x = result.posX;
 
@@ -197,9 +205,11 @@ function spriteAnimationLoop(): void {
  */
 watch(
   () => Object.entries(sprites).length,
-  (newLength, oldLength) => {
-    if (newLength > 0 && spritesTemplateRef.value) {
-      // Cancel any existing animation frame
+  (length) => {
+    if (length > 0 && spritesTemplateRef.value) {
+      /**
+       * If we have sprites, start the animation loop
+       */
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
