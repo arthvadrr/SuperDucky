@@ -36,7 +36,9 @@ onMounted(() => {
   updateContainerWidth();
   window.addEventListener('resize', updateContainerWidth);
 
-  // Start animation loop
+  /**
+   * Start the animation loop
+   */
   animationFrameId = requestAnimationFrame(spriteAnimationLoop);
 });
 
@@ -55,9 +57,10 @@ onBeforeUnmount(() => {
   spriteElements.clear();
 });
 
-// Add after the ref declarations
+/**
+ * Watch for container width changes and update our animation bounds
+ */
 watch(spritesTemplateRef, (newValue) => {
-  console.log('Container ref changed:', newValue);
   if (newValue) {
     updateContainerWidth();
   }
