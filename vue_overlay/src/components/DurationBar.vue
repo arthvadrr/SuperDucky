@@ -1,5 +1,6 @@
 <script setup lang="ts">
-const { duration, height = 10 } = defineProps<{ duration: number; height: number }>();
+const { duration, height = 10 } = defineProps<{ duration: number; height?: number }>();
+
 </script>
 
 <template>

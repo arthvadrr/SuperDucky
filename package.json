@@ -24,8 +24,8 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix vue_overlay\"",
-    "build": "concurrently \"npm run dev --prefix server\" \"npm run build --prefix overlay\"",
-    "preview": "concurrently \"npm run dev --prefix server\" \"npm run preview --prefix overlay\"",
+    "build": "concurrently \"npm run dev --prefix server\" \"npm run build --prefix vue_overlay\"",
+    "preview": "concurrently \"npm run dev --prefix server\" \"npm run preview --prefix vue_overlay\"",
     "serve": "concurrently \"npm run dev --prefix server\" \"npm run build --prefix overlay && npm run preview --prefix overlay\"",
     "install-all": "npm install && npm install --prefix server && npm install --prefix overlay"
   },

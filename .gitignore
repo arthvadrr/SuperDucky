@@ -42,3 +42,4 @@ coverage/
 **/excerpts_*.sql
 *.db
 **/*.db
+Cat.svg
