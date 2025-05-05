@@ -26,20 +26,17 @@ const spriteElements: Map<string, HTMLElement> = new Map<string, HTMLElement>();
  * Update container width and handle window resize
  */
 function updateContainerWidth(): void {
-  console.log('Updating container width, ref value:', spritesTemplateRef.value);
   if (spritesTemplateRef.value) {
     boundingClientRectWidth.value = spritesTemplateRef.value.getBoundingClientRect().width;
   }
 }
 
 onMounted(() => {
-  console.log('Component mounted, ref value:', spritesTemplateRef.value);
   isMounted.value = true;
   updateContainerWidth();
   window.addEventListener('resize', updateContainerWidth);
 
   // Start animation loop
-  console.log('Starting initial animation loop');
   animationFrameId = requestAnimationFrame(spriteAnimationLoop);
 });
 
@@ -72,29 +69,22 @@ watch(spritesTemplateRef, (newValue) => {
 watch(
   () => sprites,
   async (newSprites) => {
-    console.log('Sprites changed:', Object.keys(newSprites));
-
     // Wait for next tick to ensure DOM is updated
     await nextTick();
 
     // Wait for container to be available
     if (!spritesTemplateRef.value) {
-      console.log('Container not ready, waiting...');
       return;
     }
 
     // Find new sprites
     Object.entries(newSprites).forEach(([username, sprite]) => {
-      console.log('Checking sprite:', username);
-
       if (!spriteElements.has(username)) {
-        console.log('New sprite found:', username);
         const spriteElement = spritesTemplateRef.value?.querySelector(
           `[data-username="${username}"]`,
         ) as HTMLElement;
 
         if (spriteElement) {
-          console.log('Found element for new sprite:', username);
           spriteElements.set(username, spriteElement);
 
           // Initialize sprite state
@@ -102,18 +92,9 @@ watch(
           if (!sprite.position) {
             sprite.position = { x: 0, y: 0 };
           }
-          console.log(
-            'Initialized new sprite:',
-            username,
-            'state:',
-            sprite.state.key,
-            'position:',
-            sprite.position,
-          );
 
           // Initialize animation
           if (!spriteAnimations.has(username)) {
-            console.log('Creating animation for new sprite:', username);
             spriteAnimations.set(
               username,
               new SpriteAnimation({
@@ -127,13 +108,6 @@ watch(
               }),
             );
           }
-        } else {
-          console.log(
-            'No element found for new sprite:',
-            username,
-            'container:',
-            spritesTemplateRef.value,
-          );
         }
       }
     });
@@ -141,14 +115,10 @@ watch(
     // Find removed sprites
     spriteElements.forEach((element, username) => {
       if (!newSprites[username]) {
-        console.log('Sprite removed:', username);
         spriteElements.delete(username);
         spriteAnimations.delete(username);
       }
     });
-
-    console.log('Current spriteElements:', Array.from(spriteElements.keys()));
-    console.log('Current spriteAnimations:', Array.from(spriteAnimations.keys()));
   },
   { deep: true },
 );
@@ -158,42 +128,19 @@ watch(
  */
 function spriteAnimationLoop(): void {
   if (!isMounted.value) {
-    console.log('Not mounted yet, skipping animation frame');
     return;
   }
 
   const spritesContainer = spritesTemplateRef.value;
   if (!spritesContainer) {
-    console.log('No sprites container found in animation loop');
     return;
   }
-
-  console.log('Animation loop running');
-  console.log(
-    'spriteElements:',
-    Array.from(spriteElements.entries()).map(([k, v]) => k),
-  );
-  console.log(
-    'spriteAnimations:',
-    Array.from(spriteAnimations.entries()).map(([k, v]) => k),
-  );
-  console.log('sprites in store:', Object.keys(sprites));
 
   for (const [username, spriteElement] of spriteElements) {
     const sprite: Sprite = sprites[username];
     if (!sprite) {
-      console.log('No sprite found for username:', username);
       continue;
     }
-
-    console.log(
-      'Processing sprite:',
-      username,
-      'state:',
-      sprite.state.key,
-      'position:',
-      sprite.position,
-    );
 
     if (sprite.state.isPausedTimeout) {
       if (sprite.state.key !== 'idle') {
@@ -204,7 +151,6 @@ function spriteAnimationLoop(): void {
 
     const animation = spriteAnimations.get(username);
     if (!animation) {
-      console.log('No animation found for:', username);
       continue;
     }
 
@@ -213,13 +159,11 @@ function spriteAnimationLoop(): void {
        * Update position using SpriteAnimation
        */
       const result: AnimationResult = animation.animations.walk();
-      console.log('Walk result for', username, ':', result);
 
       /**
        * Update DOM with animation result
        */
       const transform = `translateX(${result.posX}px)`;
-      console.log('Applying transform:', transform);
       spriteElement.style.transform = transform;
       sprite.deltaX = result.deltaX;
       sprite.position.x = result.posX;
@@ -254,9 +198,7 @@ function spriteAnimationLoop(): void {
 watch(
   () => Object.entries(sprites).length,
   (newLength, oldLength) => {
-    console.log('Sprite count changed:', oldLength, '->', newLength);
     if (newLength > 0 && spritesTemplateRef.value) {
-      console.log('Starting animation loop');
       // Cancel any existing animation frame
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);

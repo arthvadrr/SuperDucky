@@ -1,11 +1,9 @@
 <template>
-  <div class="header">
-    Header
-  </div>
+  <div class="header">Header</div>
 </template>
 
 <script setup lang="ts">
-  console.log('header');
+console.log('header');
 </script>
 
 <style scoped>
