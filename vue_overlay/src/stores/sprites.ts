@@ -108,11 +108,13 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
 }
 
 /**
- * Create the reactive store
- * Use ref to allow replacing the whole object if needed
+ * Create the reactive store, init with mock sprites for testing
  */
 export const sprites: Sprites = reactive(initMockSprites(0) as Sprites);
 
-spawnMockSpritesOverTime(50, 10_000);
+/**
+ * Spawn mock sprites over a duration
+ */
+spawnMockSpritesOverTime(5, 10_000);
 
 export default sprites;
