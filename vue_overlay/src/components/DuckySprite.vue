@@ -12,7 +12,6 @@ const { sprite } = defineProps<{
   <div
     class="sprite-container"
     :style="{
-      left: `${sprite.position.x}px`,
       zIndex: sprite.state.key === 'talk' ? 100 : 1,
     }"
   >
@@ -50,7 +49,7 @@ const { sprite } = defineProps<{
       :style="{
         height: `${sprite.size}px`,
         width: `${sprite.size}px`,
-        transform: `scale(${sprite.deltaX}, 1)`,
+        transform: `scaleX(${sprite.deltaX})`,
       }"
       :color="sprite.color"
       :username="sprite.username"
@@ -67,6 +66,7 @@ const { sprite } = defineProps<{
   flex-direction: column;
   align-items: center;
   bottom: 0;
+  will-change: transform;
 
   .nameplate-container {
     padding: 4px 12px;
@@ -124,6 +124,8 @@ const { sprite } = defineProps<{
     mask-position: bottom;
     mask-repeat: no-repeat;
     background-blend-mode: color;
+    transform-origin: center;
+    overflow: visible;
 
     .sprite-mask-overlay {
       position: absolute;

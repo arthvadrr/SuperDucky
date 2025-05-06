@@ -21,24 +21,19 @@ export default class SpriteAnimation {
   private readonly bounds: Record<'start' | 'end', number>;
   private readonly speed: number;
 
-  constructor({ posX, deltaX, speed, bounds }: AnimationProps) {
-    this.posX = posX ?? 0;
-    this.deltaX = deltaX ?? 1;
-    this.speed = speed ?? 1;
-    this.bounds = bounds ?? {
-      start: 0,
-      end: 0,
-    };
+  constructor({ posX = 0, deltaX = 1, speed = 1, bounds = { start: 0, end: 0 } }: AnimationProps) {
+    this.posX = posX;
+    this.deltaX = deltaX;
+    this.speed = speed;
+    this.bounds = bounds;
   }
 
-  animations: Record<string, () => AnimationResult> = {
-    walk: this.animateWalk.bind(this),
-  };
-
   animateWalk(): AnimationResult {
-    if (this.deltaX === 1 && this.posX >= this.bounds.end) {
+    const { start, end } = this.bounds;
+
+    if (this.deltaX === 1 && this.posX >= end) {
       this.deltaX = -1;
-    } else if (this.deltaX === -1 && this.posX <= this.bounds.start) {
+    } else if (this.deltaX === -1 && this.posX <= start) {
       this.deltaX = 1;
     }
 

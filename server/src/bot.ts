@@ -129,15 +129,9 @@ export async function startDucky(): Promise<void> {
 
         try {
           const excerpt_res: Response = await fetch(`http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`);
-
-          console.log('GOT RES');
           
-          console.log(excerpt_res);
-
           if (excerpt_res.ok) {
             const excerpt: Excerpt = await excerpt_res.json();
-            
-            console.log('emiiting: ', JSON.stringify(excerpt));
 
             getSocketServer().emit('excerpt', { excerpt });
           }
@@ -151,7 +145,7 @@ export async function startDucky(): Promise<void> {
         if (args.length === 1 && /^#?[0-9A-Fa-f]{6}$/.test(args[0])) {
           getSocketServer().emit('message', {
             messageText: `Updated to ${args[0]}`,
-            color: args[0],
+            color: args[0].startsWith('#') ? args[0] : `#${args[0]}`,
             command: ctxCommand,
             username: ctx.userDisplayName ?? '',
           });
@@ -165,7 +159,7 @@ export async function startDucky(): Promise<void> {
             username: ctx.userDisplayName ?? '',
           });
         } else {
-          await ctx.reply(`@${ctx.userDisplayName} Please provide a valid ducking hex color (e.g. #FFD94E).`)
+          await ctx.reply(`@${ctx.userDisplayName} Provide a valid hex color like duck yellow #FFD94E.`)
         }
       }
 

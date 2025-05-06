@@ -16,6 +16,8 @@ SuperDucky is my Twitch bot!
 - !followage
 - Sprite dance
 - sql:setup on clone for db
+- Fix unhandled color updates
+- Shallow reative on sprites for performance
 
 ## Project Structure
 
