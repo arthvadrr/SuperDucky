@@ -4,7 +4,7 @@ import sprites from '../stores/sprites';
 import DuckySprite from './DuckySprite.vue';
 import SpriteAnimation from '@/classes/SpriteAnimation.ts';
 import getReadingLength from '@/util/getReadingLength.ts';
-import type { Sprite, SpriteStateKey } from '@/stores/sprites';
+import type { Sprite } from '@/stores/sprites';
 import type { AnimationResult } from '@/classes/SpriteAnimation';
 
 const spritesTemplateRef = ref<HTMLDivElement | null>(null);
@@ -89,17 +89,16 @@ watch(
      */
     Object.entries(newSprites).forEach(([username, sprite]) => {
       if (!spriteElements.has(username)) {
-        const spriteElement = spritesTemplateRef.value?.querySelector(
-          `[data-username="${username}"]`,
-        ) as HTMLElement;
+        const spriteElement: HTMLElement | null | undefined =
+          spritesTemplateRef.value?.querySelector(`[data-username="${username}"]`);
 
         if (spriteElement) {
           spriteElements.set(username, spriteElement);
-
           /**
-           * Set initial state to walk
+           * Set initial state
            */
-          sprite.state.key = 'walk';
+          sprite.state.key = sprite.messages.length > 0 ? 'talk' : 'walk';
+
           if (!sprite.position) {
             sprite.position = { x: 0, y: 0 };
           }
@@ -160,7 +159,8 @@ function spriteAnimationLoop(): void {
     /**
      * If the sprite is paused, skip animation logic
      */
-    if (sprite.state.key === 'idle') return;
+
+    if (sprite.state.key === 'idle' || sprite.state.key === 'talk') return;
 
     const result = animation.animateWalk();
 
@@ -172,10 +172,10 @@ function spriteAnimationLoop(): void {
     /**
      * Randomly pause the sprite's movement for a while
      */
-    const shouldPause = Math.random() < 0.002; // Adjust probability as needed
+    const shouldPause = Math.random() < 0.002;
 
     if (shouldPause) {
-      const pauseDuration = Math.random() * (25000 - 16000) + 16000; // 16-25s pause
+      const pauseDuration = Math.random() * (25000 - 16000) + 16000;
 
       /**
        * Pause the sprite for a while
@@ -184,7 +184,7 @@ function spriteAnimationLoop(): void {
 
       const timeoutId = setTimeout(() => {
         sprite.state.isPausedTimeout = null;
-        sprite.state.key = 'walk'; // Resume walking
+        sprite.state.key = 'walk';
         pendingTimeouts.delete(username);
       }, pauseDuration);
 
@@ -200,7 +200,7 @@ function spriteAnimationLoop(): void {
     const spriteElement = spriteElements.get(username);
 
     if (spriteElement) {
-      spriteElement.style.transform = `translateX(${posX}px)`;
+      spriteElement.style.transform = `translate3d(${posX}px, 0, 0)`;
     }
 
     sprites[username].position.x = posX;
@@ -212,7 +212,6 @@ function spriteAnimationLoop(): void {
    */
   animationFrameId = requestAnimationFrame(spriteAnimationLoop);
 }
-
 
 /**
  * Sync animations to browser frames
@@ -249,7 +248,6 @@ watchEffect(() => {
       sprite.messages.length > 0
     ) {
       const readingLength: number = getReadingLength(sprite.messages[0].messageText);
-      const prevState: SpriteStateKey = sprite.state.key;
 
       /**
        * Show chat bubble and set sprite to talking state
@@ -258,18 +256,26 @@ watchEffect(() => {
       sprite.state.isShowingMessage = true;
 
       /**
-       * Hide message after reading time, then return to previous state
+       * Clear any pending timeouts and durations
+       */
+      sprite.state.isPausedTimeout = null;
+      sprite.state.isPausedDuration = 0;
+
+      /**
+       * Hide message after reading time, then set state to walk
        */
       const messageTimeoutId = setTimeout(() => {
         sprite.state.isShowingMessage = false;
+
         const resetTimeoutId = setTimeout(() => {
-          sprite.state.key = prevState;
           sprite.state.isShowingMessageTimeout = null;
           sprite.messages.shift();
           pendingTimeouts.delete(`${username}-reset`);
         }, 1000);
+
         sprite.state.isShowingMessageTimeout = resetTimeoutId;
         pendingTimeouts.set(`${username}-reset`, resetTimeoutId);
+        sprite.state.key = 'walk';
       }, readingLength);
 
       /**
