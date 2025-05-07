@@ -1,18 +1,25 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 import type { SpriteStateKey } from '@/stores/sprites';
+import type { walk } from 'vue/compiler-sfc';
+import type { hideLinkEmbed } from 'discord.js';
 
-const { color, username, state, size } = defineProps<{
-  color: string;
-  username: string;
-  state: SpriteStateKey;
-  size: number;
-}>();
+// let { color, username, state, size } = defineProps<{
+//   color: string;
+//   username: string;
+//   state: SpriteStateKey;
+//   size: number;
+// }>();
+
+const username = 'foo';
+const color = '#ff0000';
+const state = 'walk';
 </script>
 
 <template>
   <svg
     :id="username"
+    class="CatSVG"
     width="100%"
     height="100%"
     xmlns="http://www.w3.org/2000/svg"
@@ -21,60 +28,69 @@ const { color, username, state, size } = defineProps<{
     stroke-linecap="round"
     stroke-linejoin="round"
     stroke-miterlimit="2"
-    viewBox="0 0 23 22"
+    viewBox="0 0 22.5 19.1"
   >
     <path
-      data-section="Tail"
-      fill="#e19950"
-      stroke="#000"
-      stroke-width="0.4"
-      d="M4 11.52c-.6-.17-1.23-.1-1.67-1.2-.23-.7-.01-1.44.2-1.8.5-.86.93-2.87-.22-4.06C1.6 3.8.85 3.6.37 4.14c-.26.3-.17.84.28 1.23.66.57.76 1.48.43 2.23a5.7 5.7 0 0 0-.57 2.23c-.04 1.22.73 2.17 1.95 2.96 2.03 1.25 4.34-.54 1.55-1.27Z"
-    />
-    <path
       data-section="Hind-Right-Leg"
-      fill="url(#CatGradient)"
       stroke="#000"
       stroke-width=".4"
       d="m9.53 20.4-.2-.58.2.58c1.11.04.83-1.28-.17-1.49-.2-.22-.7-.82-.52-1.65.19-.67.77-7.48-3.7-6.65-3.02 1.12-1.85 3.82 1.62 6.06l-.01.77c0 .64.27 1.12.68 1.76.88 1.29 1.19 1.21 2.1 1.2Z"
+      :fill="`url(#_cat_linear_gradient_${username})`"
+      :class="{ walk: state === 'walk', hideRightLeg: state === 'hideRightLeg' }"
     />
     <path
       data-section="Front-Right-Leg"
-      fill="#e19950"
+      :fill="`url(#_cat_linear_gradient_${username})`"
       stroke="#000"
       stroke-width=".4"
       d="m17.27 20.75-.2-.66.2.66c.77-.08.97-.44.8-.94-.21-.43-.85-.56-1-.8a6.23 6.23 0 0 1-.55-4.5c2.09-7.08-11.82-5.89-3.66.94 1.82 1 1.97 4.51 2.96 5.13.2.08.4.2 1.46.17Z"
     />
     <path
       data-section="Front-Left-Leg"
-      fill="url(#CatGradient)"
+      :fill="`url(#_cat_linear_gradient_${username})`"
       stroke="#000"
       stroke-width=".4"
       d="m14.95 20.92-.18-.65.18.65c.77-.05.98-.4.82-.9-.19-.44-.82-.6-.97-.83a6.23 6.23 0 0 1-.38-4.52c6.31-7.45-7.63-6.76-3.7.8.67 1.83 1.82 4.58 2.78 5.23.2.1.39.22 1.45.23Z"
     />
     <path
       data-section="Cat-Body"
-      fill="url(#CatGradient)"
+      :fill="`url(#_cat_linear_gradient_${username})`"
+      stroke="#000"
+      stroke-width=".4"
+      d="M17.28 11.88a4.9 4.9 0 0 1-.9 3.31c-1.1 1.2-2.04 1.77-4.32 1.8-5.6.17-7.62-2.43-7.62-2.43C2.54 13 3.97 9.9 7.5 10.43c2.08.18 1.82.63 4.4-.56 2.87-1.24 5.32.6 5.38 2Z"
+    />
+    <path
+      data-section="Tail"
+      :fill="`url(#_cat_linear_gradient_${username})`"
+      stroke="#000"
+      stroke-width="0.4"
+      d="M4 11.52c-.6-.17-1.23-.1-1.67-1.2-.23-.7-.01-1.44.2-1.8.5-.86.93-2.87-.22-4.06C1.6 3.8.85 3.6.37 4.14c-.26.3-.17.84.28 1.23.66.57.76 1.48.43 2.23a5.7 5.7 0 0 0-.57 2.23c-.04 1.22.73 2.17 1.95 2.96 2.03 1.25 4.34-.54 1.55-1.27Z"
+      :class="{ tail: true }"
+    />
+    <path
+      data-section="Cat-Body"
+      :fill="`url(#_cat_linear_gradient_${username})`"
       stroke="#000"
       stroke-width=".4"
       d="M17.28 11.88a4.9 4.9 0 0 1-.9 3.31c-1.1 1.2-2.04 1.77-4.32 1.8-5.6.17-7.62-2.43-7.62-2.43C2.54 13 3.97 9.9 7.5 10.43c2.08.18 1.82.63 4.4-.56 2.87-1.24 5.32.6 5.38 2Z"
     />
     <path
       data-section="Hind-Left-Leg"
-      fill="url(#CatGradient)"
+      :fill="`url(#_cat_linear_gradient_${username})`"
       stroke="#000"
       stroke-width=".4"
       d="m7.5 20.77-.2-.58.2.58c1.1.05.82-1.27-.17-1.48a1.9 1.9 0 0 1-.53-1.66c.2-.66 3.94-7.1-.54-7.17-2.9.17-4.85 3.18-1.53 6.59 0 0-.02.25-.02.77 0 .63.28 1.12.68 1.76.88 1.28 1.2 1.21 2.1 1.2Z"
     />
     <path
       data-section="Front-Left-Leg"
-      fill="url(#CatGradient)"
+      :fill="`url(#_cat_linear_gradient_${username})`"
       stroke="#000"
       stroke-width=".4"
       d="M14.42 14.67a6.23 6.23 0 0 0 .38 4.52c.15.23.78.38.97.83.16.5-.05.85-.82.9l-.18-.65.18.66c-1.06-.01-1.26-.14-1.45-.23-.96-.65-2.11-3.4-2.77-5.22-3.94-7.57 10-8.26 3.69-.81Z"
     />
     <path
       data-section="Head"
-      fill="url(#CatGradient)"
+      :fill="`url(#_cat_linear_gradient_${username})`"
       stroke="#000"
       stroke-width=".4"
       d="M19.94 4.6c2.6 4.91-1.27 7.13-4.53 7.2-4.5 0-7.48-2.4-5.64-6.52-.31-3.07.04-4.44.69-5.04.85.33 1.8 1.01 3.02 2.53a7.92 7.92 0 0 1 3.46-.06C17.77 1.62 18.55.73 19.7.23c.62 1.42.24 4.35.24 4.37Z"
@@ -126,6 +142,7 @@ const { color, username, state, size } = defineProps<{
       stroke-miterlimit="2"
       stroke-width=".23"
       d="m17.09 10.2-.6-.48-.84.48.71.53.73-.53Z"
+      :class="{ talk: state === 'talk' || state === 'walk', mouth: true }"
     />
     <path
       data-section="Nose"
@@ -144,24 +161,102 @@ const { color, username, state, size } = defineProps<{
     />
     <defs>
       <linearGradient
-        id="CatGradient"
+        :id="`_cat_linear_gradient_${username}`"
+        gradientUnits="objectBoundingBox"
         x1="0"
         y1="0"
         x2="1"
         y2="0"
-        gradientUnits="objectBoundingBox"
       >
         <stop
-          offset="0"
-          stop-color="#efc79f"
+          offset="0%"
+          :stop-color="color"
+          stop-opacity="1"
         />
         <stop
-          offset="1"
-          stop-color="#e19950"
+          offset="100%"
+          stop-color="#ccc"
+          stop-opacity="1"
         />
       </linearGradient>
     </defs>
   </svg>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+svg {
+  overflow: visible;
+}
+
+svg * {
+  will-change: transform;
+}
+
+.CatSVG {
+  position: relative;
+}
+
+.mouth {
+  &.talk {
+    animation: talk 500ms linear infinite;
+  }
+}
+
+.tail {
+  animation: tail 30s linear infinite;
+  animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  transform-origin: 20% 100%;
+}
+
+@keyframes tail {
+  0% {
+    transform: skewX(0deg) rotate(0deg);
+  }
+  10% {
+    transform: skewX(8deg) rotate(12deg);
+  }
+  20% {
+    transform: skewX(-10deg) rotate(-5deg);
+  }
+  30% {
+    transform: skewX(6deg) rotate(-8deg);
+  }
+  40% {
+    transform: skewX(-8deg) rotate(-8deg);
+  }
+  50% {
+    transform: skewX(8deg) rotate(3deg);
+  }
+  60% {
+    transform: skewX(-6deg) rotate(-5deg);
+  }
+  65% {
+    transform: skewX(-6deg) rotate(-8deg);
+  }
+  70% {
+    transform: skewX(7deg) rotate(-5deg);
+  }
+  80% {
+    transform: skewX(-5deg) rotate(-8deg);
+  }
+  90% {
+    transform: skewX(3deg) rotate(2deg);
+  }
+  100% {
+    transform: skewX(0deg) rotate(0deg);
+  }
+}
+
+@keyframes talk {
+  0%,
+  49.9999%,
+  65% {
+    visibility: visible;
+  }
+  50%,
+  64.9999%,
+  100% {
+    visibility: hidden;
+  }
+}
+</style>
