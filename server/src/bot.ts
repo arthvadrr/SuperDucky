@@ -1,15 +1,14 @@
 import path from 'path';
 import dotenv from 'dotenv';
-import { getSocketServer } from './socket';
 import { promises as fs } from 'fs';
-import { ApiClient } from '@twurple/api';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
-import { MessageEvent } from '@twurple/easy-bot';
-import { Bot } from '@twurple/easy-bot';
-import type Excerpt from "./types/Excerpt";
+import { MessageEvent, Bot } from '@twurple/easy-bot';
+import { ApiClient } from '@twurple/api';
+import { getSocketServer } from './socket';
+import type Excerpt from './types/Excerpt';
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env.server.local') });
 dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env.server.local') });
 
 export async function startDucky(): Promise<void> {
   const clientId: string = process.env.CLIENT_ID ?? '';
@@ -18,13 +17,7 @@ export async function startDucky(): Promise<void> {
   const refreshToken: string = process.env.REFRESH_TOKEN ?? '';
   const tokenPath: string = path.join(__dirname, 'tokens.json');
 
-  if (
-    !clientId ||
-    !clientSecret ||
-    !accessToken ||
-    !refreshToken ||
-    !tokenPath
-  ) {
+  if (!clientId || !clientSecret || !accessToken || !refreshToken || !tokenPath) {
     console.error('Missing environment variables.');
     process.exit(1);
   }
@@ -59,20 +52,14 @@ export async function startDucky(): Promise<void> {
   /**
    * Handles writing the refreshed token to tokens.json
    */
-  authProvider.onRefresh(
-    async (_: string, newTokenData: AccessToken): Promise<void> => {
-      try {
-        await fs.writeFile(
-          tokenPath,
-          JSON.stringify(newTokenData, null, 4),
-          'utf-8',
-        );
-        console.log('Tokens refreshed successfully');
-      } catch (error) {
-        console.error('Failed to save refreshed tokens:', error);
-      }
-    },
-  );
+  authProvider.onRefresh(async (_: string, newTokenData: AccessToken): Promise<void> => {
+    try {
+      await fs.writeFile(tokenPath, JSON.stringify(newTokenData, null, 4), 'utf-8');
+      console.log('Tokens refreshed successfully');
+    } catch (error) {
+      console.error('Failed to save refreshed tokens:', error);
+    }
+  });
 
   const userId: string = await authProvider.addUserForToken(tokenData);
   authProvider.addIntentsToUser(userId, ['chat']);
@@ -90,7 +77,6 @@ export async function startDucky(): Promise<void> {
   setInterval((): void => {
     getSocketServer().emit('purge');
   }, 10000);
-
 
   async function emitDuckyBotMessage({
     ctx,
@@ -126,10 +112,11 @@ export async function startDucky(): Promise<void> {
       const [ctxCommand, ...args] = messageText.slice(1).split(' ');
 
       if (ctxCommand === 'duckylore') {
-
         try {
-          const excerpt_res: Response = await fetch(`http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`);
-          
+          const excerpt_res: Response = await fetch(
+            `http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`,
+          );
+
           if (excerpt_res.ok) {
             const excerpt: Excerpt = await excerpt_res.json();
 
@@ -149,8 +136,6 @@ export async function startDucky(): Promise<void> {
             command: ctxCommand,
             username: ctx.userDisplayName ?? '',
           });
-
-
         } else if (args[0]?.toLowerCase() === 'unset') {
           getSocketServer().emit('message', {
             messageText,
@@ -159,7 +144,9 @@ export async function startDucky(): Promise<void> {
             username: ctx.userDisplayName ?? '',
           });
         } else {
-          await ctx.reply(`@${ctx.userDisplayName} Provide a valid hex color like duck yellow #FFD94E.`)
+          await ctx.reply(
+            `@${ctx.userDisplayName} Provide a valid hex color like duck yellow #FFD94E.`,
+          );
         }
       }
 

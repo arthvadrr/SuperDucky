@@ -21,10 +21,10 @@ SuperDucky is my Twitch bot!
 
 ## Project Structure
 
-Contains the backend built with Node.js, Express, and Socket.IO, and the client-side application built with React and TypeScript, meant to be used as an OBS overlay.
+Contains the backend built with Node.js, Express, Socket.IO, and TypeScript, and the client-side application built with Vite, React, and TypeScript, meant to be used as an OBS overlay.
 
-- Listens on the port set in `.env.server.local`
-- WebSocket server is initialized using `Socket.IO`
+- Listens on the port specified in `.env.server.local`
+- WebSocket server runs on the server port defined in `.env.server.local` and is initialized using `Socket.IO`
 - Handles real-time Twitch chat commands like `!project`
 - Connects to the server via `socket.io-client`
 - Real-time updates received via `projectMessage` socket event
@@ -34,7 +34,7 @@ Contains the backend built with Node.js, Express, and Socket.IO, and the client-
 
 ### Installation
 
-From root, you can install dependencies:
+From root, you can install dependencies for both `server/` and `overlay/` using:
 
 ```bash
 npm run install-all
@@ -48,11 +48,11 @@ After setting up the `.env.server.local` and `.env.shared.local`, from root you 
 npm run dev
 ```
 
-This will start the server and the overlay concurrently.
+This uses `concurrently` to run both the server and the overlay.
 
 ## Environment Variables
 
-Use `.env` files to configure environment variables. Examples are provided as `.env-example` in both the `server` and `overlay` directories.
+Use `.env.shared.local` and `.env.server.local` files to configure environment variables. Examples are provided as `.env-example` in both the `server` and `overlay` directories.
 
 ## Example Environment Variables
 
@@ -85,4 +85,4 @@ REFRESH_TOKEN=your_refresh_token
 
 ## License
 
-[GNU GPLv3](LICENSE)
+Licensed under the [GNU GPLv3](LICENSE)
