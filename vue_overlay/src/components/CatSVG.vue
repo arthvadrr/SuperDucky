@@ -36,7 +36,11 @@ const state = 'walk';
       stroke-width=".4"
       d="m9.53 20.4-.2-.58.2.58c1.11.04.83-1.28-.17-1.49-.2-.22-.7-.82-.52-1.65.19-.67.77-7.48-3.7-6.65-3.02 1.12-1.85 3.82 1.62 6.06l-.01.77c0 .64.27 1.12.68 1.76.88 1.29 1.19 1.21 2.1 1.2Z"
       :fill="`url(#_cat_linear_gradient_${username})`"
-      :class="{ walk: state === 'walk', hideRightLeg: state === 'hideRightLeg' }"
+      :class="{
+        hind: true,
+        walk: state === 'walk',
+      }"
+      style="animation-delay: 0.5s"
     />
     <path
       data-section="Front-Right-Leg"
@@ -44,13 +48,10 @@ const state = 'walk';
       stroke="#000"
       stroke-width=".4"
       d="m17.27 20.75-.2-.66.2.66c.77-.08.97-.44.8-.94-.21-.43-.85-.56-1-.8a6.23 6.23 0 0 1-.55-4.5c2.09-7.08-11.82-5.89-3.66.94 1.82 1 1.97 4.51 2.96 5.13.2.08.4.2 1.46.17Z"
-    />
-    <path
-      data-section="Front-Left-Leg"
-      :fill="`url(#_cat_linear_gradient_${username})`"
-      stroke="#000"
-      stroke-width=".4"
-      d="m14.95 20.92-.18-.65.18.65c.77-.05.98-.4.82-.9-.19-.44-.82-.6-.97-.83a6.23 6.23 0 0 1-.38-4.52c6.31-7.45-7.63-6.76-3.7.8.67 1.83 1.82 4.58 2.78 5.23.2.1.39.22 1.45.23Z"
+      :class="{
+        front: true,
+        walk: state === 'walk',
+      }"
     />
     <path
       data-section="Cat-Body"
@@ -80,6 +81,10 @@ const state = 'walk';
       stroke="#000"
       stroke-width=".4"
       d="m7.5 20.77-.2-.58.2.58c1.1.05.82-1.27-.17-1.48a1.9 1.9 0 0 1-.53-1.66c.2-.66 3.94-7.1-.54-7.17-2.9.17-4.85 3.18-1.53 6.59 0 0-.02.25-.02.77 0 .63.28 1.12.68 1.76.88 1.28 1.2 1.21 2.1 1.2Z"
+      :class="{
+        hind: true,
+        walk: state === 'walk',
+      }"
     />
     <path
       data-section="Front-Left-Leg"
@@ -87,6 +92,11 @@ const state = 'walk';
       stroke="#000"
       stroke-width=".4"
       d="M14.42 14.67a6.23 6.23 0 0 0 .38 4.52c.15.23.78.38.97.83.16.5-.05.85-.82.9l-.18-.65.18.66c-1.06-.01-1.26-.14-1.45-.23-.96-.65-2.11-3.4-2.77-5.22-3.94-7.57 10-8.26 3.69-.81Z"
+      :class="{
+        front: true,
+        walk: state === 'walk',
+      }"
+      style="animation-delay: 0.4s"
     />
     <path
       data-section="Head"
@@ -142,7 +152,8 @@ const state = 'walk';
       stroke-miterlimit="2"
       stroke-width=".23"
       d="m17.09 10.2-.6-.48-.84.48.71.53.73-.53Z"
-      :class="{ talk: state === 'talk' || state === 'walk', mouth: true }"
+      class="mouth"
+      :class="{ talk: state === 'talk' || state === 'walk' }"
     />
     <path
       data-section="Nose"
@@ -208,42 +219,68 @@ svg * {
   transform-origin: 20% 100%;
 }
 
+.walk {
+  animation-timing-function: linear;
+
+  &.front {
+    animation: walk-front 1s linear infinite;
+    transform-origin: 65% 50%;
+  }
+
+  &.hind {
+    animation: walk-hind 1s linear infinite;
+    transform-origin: 30% 60%;
+  }
+}
+
+@keyframes walk-front {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+}
+
+@keyframes walk-hind {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(0deg);
+  }
+}
+
 @keyframes tail {
-  0% {
+  0%,
+  100% {
     transform: skewX(0deg) rotate(0deg);
   }
   10% {
-    transform: skewX(8deg) rotate(12deg);
+    transform: skewX(8deg) rotate(10deg);
   }
-  20% {
-    transform: skewX(-10deg) rotate(-5deg);
-  }
-  30% {
-    transform: skewX(6deg) rotate(-8deg);
+  25% {
+    transform: skewX(-8deg) rotate(-6deg);
   }
   40% {
-    transform: skewX(-8deg) rotate(-8deg);
+    transform: skewX(6deg) rotate(8deg);
   }
-  50% {
-    transform: skewX(8deg) rotate(3deg);
-  }
-  60% {
+  55% {
     transform: skewX(-6deg) rotate(-5deg);
   }
-  65% {
-    transform: skewX(-6deg) rotate(-8deg);
-  }
   70% {
-    transform: skewX(7deg) rotate(-5deg);
+    transform: skewX(7deg) rotate(5deg);
   }
-  80% {
-    transform: skewX(-5deg) rotate(-8deg);
-  }
-  90% {
-    transform: skewX(3deg) rotate(2deg);
-  }
-  100% {
-    transform: skewX(0deg) rotate(0deg);
+  85% {
+    transform: skewX(-5deg) rotate(-7deg);
   }
 }
 
