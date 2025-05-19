@@ -188,7 +188,7 @@ function spriteAnimationLoop(): void {
         pendingTimeouts.delete(username);
       }, pauseDuration);
 
-      sprite.state.isPausedTimeout = timeoutId;
+      sprite.state.isPausedTimeout = Number(timeoutId);
       pendingTimeouts.set(username, timeoutId);
     }
   });
@@ -273,7 +273,7 @@ watchEffect(() => {
           pendingTimeouts.delete(`${username}-reset`);
         }, 1000);
 
-        sprite.state.isShowingMessageTimeout = resetTimeoutId;
+        sprite.state.isShowingMessageTimeout = Number(resetTimeoutId);
         pendingTimeouts.set(`${username}-reset`, resetTimeoutId);
         sprite.state.key = 'walk';
       }, readingLength);
@@ -281,7 +281,7 @@ watchEffect(() => {
       /**
        * Store timeout for cleanup
        */
-      sprite.state.isShowingMessageTimeout = messageTimeoutId;
+      sprite.state.isShowingMessageTimeout = Number(messageTimeoutId);
       pendingTimeouts.set(`${username}-message`, messageTimeoutId);
     }
   }
