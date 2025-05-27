@@ -5,5 +5,6 @@ import DuckyLore from '@/components/DuckyLore.vue';
 <template>
   <div class="sidebar">
     <DuckyLore />
+    <!-- <CatSVG /> -->
   </div>
 </template>

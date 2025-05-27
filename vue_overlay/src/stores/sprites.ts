@@ -115,6 +115,6 @@ export const sprites: Sprites = reactive(initMockSprites(0) as Sprites);
 /**
  * Spawn mock sprites over a duration
  */
-spawnMockSpritesOverTime(5, 10_000);
+spawnMockSpritesOverTime(0, 0);
 
 export default sprites;

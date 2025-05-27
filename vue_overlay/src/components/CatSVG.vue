@@ -1,4 +1,14 @@
 <script setup lang="ts">
+
+// let { color, username, state, size } = defineProps<{
+//   color: string;
+//   username: string;
+//   state: SpriteStateKey;
+//   size: number;
+// }>();
+
+const username = 'foo';
+const state = 'walk';
 </script>
 
 <template>
@@ -86,5 +96,105 @@
 </template>
 
 <style scoped lang="scss">
+svg {
+  overflow: visible;
+}
 
+svg * {
+  will-change: transform;
+}
+
+.CatSVG {
+  position: relative;
+}
+
+.mouth {
+  &.talk {
+    animation: talk 500ms linear infinite;
+  }
+}
+
+.tail {
+  animation: tail 30s linear infinite;
+  animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  transform-origin: 20% 100%;
+}
+
+.walk {
+  animation-timing-function: linear;
+
+  &.front {
+    animation: walk-front 1s linear infinite;
+    transform-origin: 65% 50%;
+  }
+
+  &.hind {
+    animation: walk-hind 1s linear infinite;
+    transform-origin: 30% 60%;
+  }
+}
+
+@keyframes walk-front {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+}
+
+@keyframes walk-hind {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tail {
+  0%,
+  100% {
+    transform: skewX(0deg) rotate(0deg);
+  }
+  10% {
+    transform: skewX(8deg) rotate(10deg);
+  }
+  25% {
+    transform: skewX(-8deg) rotate(-6deg);
+  }
+  40% {
+    transform: skewX(6deg) rotate(8deg);
+  }
+  55% {
+    transform: skewX(-6deg) rotate(-5deg);
+  }
+  70% {
+    transform: skewX(7deg) rotate(5deg);
+  }
+  85% {
+    transform: skewX(-5deg) rotate(-7deg);
+  }
+}
+
+@keyframes talk {
+  0%,
+  49.9999%,
+  65% {
+    visibility: visible;
+  }
+  50%,
+  64.9999%,
+  100% {
+    visibility: hidden;
+  }
+}
 </style>
