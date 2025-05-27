@@ -188,7 +188,7 @@ function spriteAnimationLoop(): void {
         pendingTimeouts.delete(username);
       }, pauseDuration);
 
-      sprite.state.isPausedTimeout = timeoutId;
+      sprite.state.isPausedTimeout = Number(timeoutId);
       pendingTimeouts.set(username, timeoutId);
     }
   });

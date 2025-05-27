@@ -34,7 +34,8 @@ defineProps<{ excerpt: Excerpt; isVisible: boolean }>();
 
 <style lang="scss">
 .lore-excerpt {
-  position: relative;
+  visibility: hidden;
+  position: absolute;
   background-color: #fff;
   box-shadow: 5px 5px 1px #000;
   border: 1px solid #000;
@@ -47,6 +48,8 @@ defineProps<{ excerpt: Excerpt; isVisible: boolean }>();
   transition: 600ms cubic-bezier(0.68, -0.55, 0.27, 1.55);
 
   &.is-visible {
+    visibility: visible;
+    position: relative;
     transform: translateX(0) rotate(0);
   }
 
