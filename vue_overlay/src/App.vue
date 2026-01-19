@@ -4,7 +4,6 @@ import OverlayFooter from './components/OverlayFooter.vue';
 import OverlaySidebar from './components/OverlaySidebar.vue';
 import './controllers/MessageController';
 import './controllers/SpriteController';
-// import './controllers/ExcerptController.ts';
 import './controllers/TaskController.ts';
 import { FONT_SIZE } from '@/util/constants.ts';
 </script>
@@ -74,6 +73,7 @@ body {
 
   .grid > div:nth-child(3) {
     grid-area: sidebar;
+    max-height: 100svh;
   }
 }
 </style>

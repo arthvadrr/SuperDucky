@@ -87,14 +87,15 @@ import TodoItem from '@/components/TodoItem.vue';
 }
 
 .tasks {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
   flex: 1;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  overflow-y: clip;
+  max-height: 100%;
 }
 
 .empty-state {
