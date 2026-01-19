@@ -203,8 +203,10 @@ function spriteAnimationLoop(): void {
       spriteElement.style.transform = `translate3d(${posX}px, 0, 0)`;
     }
 
-    sprites[username].position.x = posX;
-    sprites[username].deltaX = deltaX;
+    if (sprites[username]) {
+      sprites[username].position.x = posX;
+      sprites[username].deltaX = deltaX;
+    }
   });
 
   /**
@@ -237,52 +239,56 @@ watch(
  */
 watchEffect(() => {
   for (const username in sprites) {
-    const sprite: Sprite = sprites[username];
-
-    /**
-     * Show new message if none are currently displayed
-     */
-    if (
-      !sprite.state.isShowingMessage &&
-      !sprite.state.isShowingMessageTimeout &&
-      sprite.messages.length > 0
-    ) {
-      const readingLength: number = getReadingLength(sprite.messages[0].messageText);
+    if (sprites[username]) {
+      const sprite: Sprite = sprites[username];
 
       /**
-       * Show chat bubble and set sprite to talking state
+       * Show new message if none are currently displayed
        */
-      sprite.state.key = 'talk';
-      sprite.state.isShowingMessage = true;
+      if (
+        !sprite.state.isShowingMessage &&
+        !sprite.state.isShowingMessageTimeout &&
+        sprite.messages.length > 0
+      ) {
+        if (sprite.messages[0]) {
+          const readingLength: number = getReadingLength(sprite.messages[0].messageText);
 
-      /**
-       * Clear any pending timeouts and durations
-       */
-      sprite.state.isPausedTimeout = null;
-      sprite.state.isPausedDuration = 0;
+          /**
+           * Show chat bubble and set sprite to talking state
+           */
+          sprite.state.key = 'talk';
+          sprite.state.isShowingMessage = true;
 
-      /**
-       * Hide message after reading time, then set state to walk
-       */
-      const messageTimeoutId = setTimeout(() => {
-        sprite.state.isShowingMessage = false;
+          /**
+           * Clear any pending timeouts and durations
+           */
+          sprite.state.isPausedTimeout = null;
+          sprite.state.isPausedDuration = 0;
 
-        const resetTimeoutId = setTimeout(() => {
-          sprite.state.isShowingMessageTimeout = null;
-          sprite.messages.shift();
-          pendingTimeouts.delete(`${username}-reset`);
-        }, 1000);
+          /**
+           * Hide message after reading time, then set state to walk
+           */
+          const messageTimeoutId = setTimeout(() => {
+            sprite.state.isShowingMessage = false;
 
-        sprite.state.isShowingMessageTimeout = Number(resetTimeoutId);
-        pendingTimeouts.set(`${username}-reset`, resetTimeoutId);
-        sprite.state.key = 'walk';
-      }, readingLength);
+            const resetTimeoutId = setTimeout(() => {
+              sprite.state.isShowingMessageTimeout = null;
+              sprite.messages.shift();
+              pendingTimeouts.delete(`${username}-reset`);
+            }, 1000);
 
-      /**
-       * Store timeout for cleanup
-       */
-      sprite.state.isShowingMessageTimeout = Number(messageTimeoutId);
-      pendingTimeouts.set(`${username}-message`, messageTimeoutId);
+            sprite.state.isShowingMessageTimeout = Number(resetTimeoutId);
+            pendingTimeouts.set(`${username}-reset`, resetTimeoutId);
+            sprite.state.key = 'walk';
+          }, readingLength ?? 3000);
+
+          /**
+           * Store timeout for cleanup
+           */
+          sprite.state.isShowingMessageTimeout = Number(messageTimeoutId);
+          pendingTimeouts.set(`${username}-message`, messageTimeoutId);
+        }
+      }
     }
   }
 });
@@ -298,6 +304,7 @@ watchEffect(() => {
       :sprite="value"
       :key="key"
       :data-username="key"
+      :containerWidth="boundingClientRectWidth"
     />
   </div>
 </template>

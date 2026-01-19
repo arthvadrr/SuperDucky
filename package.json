@@ -30,6 +30,6 @@
     "install-all": "npm install && npm install --prefix server && npm install --prefix overlay"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^9.2.1"
   }
 }

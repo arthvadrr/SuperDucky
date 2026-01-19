@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import OverlayHeader from './components/OverlayHeader.vue'
-import OverlayFooter from './components/OverlayFooter.vue'
-import OverlaySidebar from './components/OverlaySidebar.vue'
-import './controllers/MessageController'
-import './controllers/SpriteController'
-import './controllers/ExcerptController.ts'
+import OverlayHeader from './components/OverlayHeader.vue';
+import OverlayFooter from './components/OverlayFooter.vue';
+import OverlaySidebar from './components/OverlaySidebar.vue';
+import './controllers/MessageController';
+import './controllers/SpriteController';
+// import './controllers/ExcerptController.ts';
+import './controllers/TaskController.ts';
 import { FONT_SIZE } from '@/util/constants.ts';
 </script>
 
 <template>
   <main class="scaffold">
-    <div class="grid" :style="{ fontSize: FONT_SIZE }">
+    <div
+      class="grid"
+      :style="{ fontSize: FONT_SIZE }"
+    >
       <OverlayHeader />
       <OverlayFooter />
       <OverlaySidebar />
@@ -21,7 +25,7 @@ import { FONT_SIZE } from '@/util/constants.ts';
 <style scoped lang="scss">
 @font-face {
   font-family: 'MonaspaceKrypton';
-  src: url('src/assets/fonts/MonaspaceKrypton-Regular.ttf') format('truetype');
+  src: url('/fonts/MonaspaceKrypton-Regular.ttf') format('truetype');
 }
 
 :root {
@@ -44,7 +48,9 @@ body {
 }
 
 .scaffold {
+  width: 100vw;
   height: 100vh;
+  overflow: clip;
 
   .grid {
     height: 100%;
@@ -57,7 +63,6 @@ body {
 
   .grid > div:nth-child(1) {
     grid-area: header;
-
   }
 
   .grid > div:nth-child(2) {

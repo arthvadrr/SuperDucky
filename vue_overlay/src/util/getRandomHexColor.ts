@@ -23,7 +23,7 @@ export function hslToHex(h: number, s: number, l: number): string {
   ];
 
   const i = Math.floor(h / 60) % 6;
-  const [r, g, b] = combos[i];
+  const [r, g, b] = combos[i] ?? [0, 0, 0];
 
   const toHex = (n: number) =>
     Math.round((n + m) * 255)

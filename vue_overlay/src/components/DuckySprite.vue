@@ -1,36 +1,58 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import DuckySVG from '@/components/DuckySVG.vue';
 import DurationBar from '@/components/DurationBar.vue';
 import type { Sprite } from '@/stores/sprites.ts';
 
-const { sprite } = defineProps<{
+const props = defineProps<{
   sprite: Sprite;
+  containerWidth: number;
 }>();
+
+const BUBBLE_WIDTH = 400;
+const HALF_BUBBLE = BUBBLE_WIDTH / 2;
+
+const bubbleOffset = computed(() => {
+  const x = props.sprite.position.x;
+  const halfSprite = props.sprite.size / 2;
+  const spriteCenter = x + halfSprite;
+
+  if (spriteCenter < HALF_BUBBLE) {
+    return HALF_BUBBLE - spriteCenter;
+  }
+  if (spriteCenter > props.containerWidth - HALF_BUBBLE) {
+    return props.containerWidth - HALF_BUBBLE - spriteCenter;
+  }
+  return 0;
+});
 </script>
 
 <template>
   <div
     class="sprite-container"
     :style="{
-      zIndex: sprite.state.key === 'talk' ? 100 : 1,
+      zIndex: props.sprite.state.key === 'talk' ? 100 : 1,
     }"
   >
-    <div class="chat-bubble-container">
+    <div
+      class="chat-bubble-container"
+      :style="{ transform: `translateX(${bubbleOffset}px)` }"
+    >
       <div
         :class="{
           'chat-bubble': true,
-          visible: sprite.state.isShowingMessage,
+          visible: props.sprite.state.isShowingMessage,
         }"
       >
         <div
           class="chat-bubble-inner"
-          v-if="sprite.state.isShowingMessage"
+          v-if="props.sprite.state.isShowingMessage"
         >
           <DurationBar
-            :duration="sprite.messages?.[0].readingLength"
+            :duration="props.sprite.messages[0]!.readingLength"
             :height="5"
           />
-          <p class="chat-bubble-message">{{ sprite.messages?.[0].messageText ?? '' }}</p>
+          <p class="chat-bubble-message">{{ props.sprite.messages[0]!.messageText ?? '' }}</p>
         </div>
       </div>
     </div>
@@ -38,23 +60,23 @@ const { sprite } = defineProps<{
       <div
         class="nameplate"
         :style="{
-          color: sprite.color,
+          color: props.sprite.color,
         }"
       >
-        {{ sprite.username }}
+        {{ props.sprite.username }}
       </div>
     </div>
     <DuckySVG
       class="sprite"
       :style="{
-        height: `${sprite.size}px`,
-        width: `${sprite.size}px`,
-        transform: `scaleX(${sprite.deltaX})`,
+        height: `${props.sprite.size}px`,
+        width: `${props.sprite.size}px`,
+        transform: `scaleX(${props.sprite.deltaX})`,
       }"
-      :color="sprite.color"
-      :username="sprite.username"
-      :state="sprite.state.key"
-      :size="sprite.size"
+      :color="props.sprite.color"
+      :username="props.sprite.username"
+      :state="props.sprite.state.key"
+      :size="props.sprite.size"
     />
   </div>
 </template>

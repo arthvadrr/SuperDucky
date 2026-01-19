@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import type { SpriteStateKey } from '@/stores/sprites';
 import type { walk } from 'vue/compiler-sfc';
-import type { hideLinkEmbed } from 'discord.js';
 
 // let { color, username, state, size } = defineProps<{
 //   color: string;

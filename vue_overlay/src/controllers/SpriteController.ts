@@ -8,8 +8,8 @@ socket.on('purge', (): void => {
   const currentDate: number = Date.now();
 
   for (const sprite in sprites) {
-    if (currentDate > sprites[sprite].state.expiration) {
+    if (sprites[sprite] && currentDate > sprites[sprite].state.expiration) {
       delete sprites[sprite];
     }
   }
-})
+});
