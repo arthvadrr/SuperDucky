@@ -1,8 +1,8 @@
 import { Server } from 'socket.io';
+import { getAllTasks } from './db/tasks';
 import path from 'path';
 import dotenv from 'dotenv';
 import type { Server as HTTPServer } from 'http';
-import { getAllTasks } from './db/tasks';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
 
@@ -14,8 +14,6 @@ export function setMegaDuckyCallback(callback: (username: string) => void): void
 }
 
 export function initializeSocketServer(httpServer: HTTPServer): void {
-  const fesocket = `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_FRONTEND_PORT ?? '3000'}`;
-
   socketServer = new Server(httpServer, {
     cors: {
       origin: [
@@ -53,4 +51,15 @@ export function initializeSocketServer(httpServer: HTTPServer): void {
 
 export function getSocketServer(): Server {
   return socketServer;
+}
+
+export function emitChatMessage(username: string, messageText: string): void {
+  if (!socketServer) {
+    return;
+  }
+
+  socketServer.emit('message', {
+    username,
+    messageText,
+  });
 }

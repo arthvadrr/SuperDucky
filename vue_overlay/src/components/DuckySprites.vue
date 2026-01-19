@@ -1,42 +1,67 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
+import { socket } from '@/socket.ts';
 import sprites, { spriteVersion } from '../stores/sprites';
 import DuckySprite from './DuckySprite.vue';
 import SpriteAnimation from '@/classes/SpriteAnimation.ts';
 import getReadingLength from '@/util/getReadingLength.ts';
-import { socket } from '@/socket.ts';
 import type { Sprite } from '@/stores/sprites';
 import type { AnimationResult } from '@/classes/SpriteAnimation';
 
+type ActiveHugs = Map<string, { fromUser: string; toUser: string; arrivedCount: number }>;
+
+/**
+ * References
+ */
 const spritesTemplateRef = ref<HTMLDivElement | null>(null);
 const boundingClientRectWidth = ref<number>(0);
 const isMounted = ref(false);
 let animationFrameId: number;
 let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
 
+/**
+ * Sprite Animations
+ */
 const spriteAnimations: Map<string, SpriteAnimation> = new Map<string, SpriteAnimation>();
 const pendingTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map<
   string,
   ReturnType<typeof setTimeout>
 >();
+
+/**
+ * Sprite Elements
+ */
 const spriteElements: Map<string, HTMLElement> = new Map<string, HTMLElement>();
 const updatedElements: Map<string, AnimationResult> = new Map();
 
+/**
+ * Constants
+ */
 const BUBBLE_HALF_WIDTH = 200;
 
+function spriteKey(input: string | null | undefined): string {
+  return String(input ?? '').toLowerCase();
+}
+
 socket.on('mention', (data: { fromUser: string; toUser: string }) => {
-  const fromSprite = sprites[data.fromUser];
-  const toSprite = sprites[data.toUser.toLowerCase()] || sprites[data.toUser];
+  const fromKey = spriteKey(data.fromUser);
+  const fromAnimation = spriteAnimations.get(fromKey);
+  const fromSprite = sprites[fromKey];
+  const toKey = spriteKey(data.toUser);
+  const toSprite = sprites[toKey];
+  let targetX: number;
 
-  if (!fromSprite || !toSprite) return;
-
-  const fromAnimation = spriteAnimations.get(data.fromUser);
-  if (!fromAnimation) return;
+  if (!fromSprite || !toSprite) {
+    return;
+  }
 
   const fromX = fromSprite.position.x;
   const toX = toSprite.position.x;
 
-  let targetX: number;
+  if (!fromAnimation) {
+    return;
+  }
+
   if (fromX < toX) {
     targetX = toX - fromSprite.size - 10;
   } else {
@@ -47,45 +72,55 @@ socket.on('mention', (data: { fromUser: string; toUser: string }) => {
 });
 
 socket.on('move', (data: { username: string }) => {
-  const sprite = sprites[data.username];
-  if (!sprite) return;
+  const key = spriteKey(data.username);
+  const sprite = sprites[key];
+  const animation = spriteAnimations.get(key);
 
-  const animation = spriteAnimations.get(data.username);
-  if (!animation) return;
+  if (!sprite) {
+    return;
+  }
 
-  // Pick a random target within walk bounds
-  const walkStart = BUBBLE_HALF_WIDTH;
+  if (!animation) {
+    return;
+  }
+
   const walkEnd = boundingClientRectWidth.value - BUBBLE_HALF_WIDTH - sprite.size;
-  const randomTarget = walkStart + Math.floor(Math.random() * Math.max(0, walkEnd - walkStart));
+  const randomTarget =
+    BUBBLE_HALF_WIDTH + Math.floor(Math.random() * Math.max(0, walkEnd - BUBBLE_HALF_WIDTH));
 
   animation.runTo(randomTarget, 8);
 });
 
-const activeHugs: Map<string, { fromUser: string; toUser: string; arrivedCount: number }> =
-  new Map();
+const activeHugs: ActiveHugs = new Map();
 
 socket.on('hug', (data: { fromUser: string; toUser: string }) => {
-  const fromSprite = sprites[data.fromUser];
-  const toSprite = sprites[data.toUser.toLowerCase()] || sprites[data.toUser];
+  const fromKey = spriteKey(data.fromUser);
+  const toKey = spriteKey(data.toUser);
+  const fromSprite = sprites[fromKey];
+  const toSprite = sprites[toKey];
 
-  if (!fromSprite || !toSprite) return;
-  if (data.fromUser === data.toUser) return; // can't hug yourself
+  if (!fromSprite || !toSprite) {
+    return;
+  }
 
-  const fromAnimation = spriteAnimations.get(data.fromUser);
-  const toUserKey = sprites[data.toUser.toLowerCase()] ? data.toUser.toLowerCase() : data.toUser;
-  const toAnimation = spriteAnimations.get(toUserKey);
+  if (fromKey === toKey) {
+    return;
+  }
 
-  if (!fromAnimation || !toAnimation) return;
+  const fromAnimation = spriteAnimations.get(fromKey);
+  const toAnimation = spriteAnimations.get(toKey);
+
+  if (!fromAnimation || !toAnimation) {
+    return;
+  }
 
   const fromX = fromSprite.position.x;
   const toX = toSprite.position.x;
-
-  // Calculate meeting point in the middle
   const meetX = (fromX + toX) / 2;
 
-  // Adjust targets so sprites meet side by side
   let fromTarget: number;
   let toTarget: number;
+
   if (fromX < toX) {
     fromTarget = meetX - fromSprite.size / 2 - 5;
     toTarget = meetX + toSprite.size / 2 + 5;
@@ -94,17 +129,17 @@ socket.on('hug', (data: { fromUser: string; toUser: string }) => {
     toTarget = meetX - toSprite.size / 2 - 5;
   }
 
-  // Track this hug
-  const hugId = `${data.fromUser}-${toUserKey}`;
-  activeHugs.set(hugId, { fromUser: data.fromUser, toUser: toUserKey, arrivedCount: 0 });
+  const hugId = `${fromKey}-${toKey}`;
+  activeHugs.set(hugId, { fromUser: fromKey, toUser: toKey, arrivedCount: 0 });
 
   fromAnimation.runTo(fromTarget, 12, () => {
     const hug = activeHugs.get(hugId);
+
     if (hug) {
       hug.arrivedCount++;
+
       if (hug.arrivedCount >= 2) {
-        // Both arrived! Show hearts!
-        showHugHearts(data.fromUser, toUserKey);
+        showHugHearts(fromKey, toKey);
         activeHugs.delete(hugId);
       }
     }
@@ -112,11 +147,12 @@ socket.on('hug', (data: { fromUser: string; toUser: string }) => {
 
   toAnimation.runTo(toTarget, 12, () => {
     const hug = activeHugs.get(hugId);
+
     if (hug) {
       hug.arrivedCount++;
+
       if (hug.arrivedCount >= 2) {
-        // Both arrived! Show hearts!
-        showHugHearts(data.fromUser, toUserKey);
+        showHugHearts(fromKey, toKey);
         activeHugs.delete(hugId);
       }
     }
@@ -124,49 +160,58 @@ socket.on('hug', (data: { fromUser: string; toUser: string }) => {
 });
 
 function showHugHearts(user1: string, user2: string): void {
-  const sprite1 = sprites[user1];
-  const sprite2 = sprites[user2];
-
+  const huggerUser = spriteKey(user1);
+  const huggedUser = spriteKey(user2);
+  const huggerSprite = sprites[huggerUser];
+  const huggedSprite = sprites[huggedUser];
   const heartMessage = { messageText: '💜', readingLength: 3000 };
 
-  // Make sprites face each other
-  if (sprite1 && sprite2) {
-    if (sprite1.position.x < sprite2.position.x) {
-      sprite1.deltaX = 1; // face right
-      sprite2.deltaX = -1; // face left
+  /**
+   * Make sure they face each other
+   */
+  if (huggerSprite && huggedSprite) {
+    if (huggerSprite.position.x < huggedSprite.position.x) {
+      huggerSprite.deltaX = 1;
+      huggedSprite.deltaX = -1;
     } else {
-      sprite1.deltaX = -1; // face left
-      sprite2.deltaX = 1; // face right
+      huggerSprite.deltaX = -1;
+      huggedSprite.deltaX = 1;
     }
   }
 
-  // Show hearts with idle state (bypass normal message queue)
-  if (sprite1) {
-    sprite1.messages.unshift({ ...heartMessage });
-    sprite1.state.key = 'idle';
-    sprite1.state.isShowingMessage = true;
-    sprite1.state.expiration = Date.now() + 600000;
-  }
-  if (sprite2) {
-    sprite2.messages.unshift({ ...heartMessage });
-    sprite2.state.key = 'idle';
-    sprite2.state.isShowingMessage = true;
-    sprite2.state.expiration = Date.now() + 600000;
+  if (huggerSprite) {
+    huggerSprite.messages.unshift({ ...heartMessage });
+    huggerSprite.state.key = 'idle';
+    huggerSprite.state.isShowingMessage = true;
+    huggerSprite.state.expiration = Date.now() + 600000;
   }
 
-  // Clean up after delay
+  if (huggedSprite) {
+    huggedSprite.messages.unshift({ ...heartMessage });
+    huggedSprite.state.key = 'idle';
+    huggedSprite.state.isShowingMessage = true;
+    huggedSprite.state.expiration = Date.now() + 600000;
+  }
+
   setTimeout(() => {
-    if (sprite1 && sprites[user1]) {
-      sprite1.state.isShowingMessage = false;
-      sprite1.state.key = 'walk';
-      const idx = sprite1.messages.findIndex((m) => m.messageText === '💜');
-      if (idx > -1) sprite1.messages.splice(idx, 1);
+    if (huggerSprite && sprites[huggerUser]) {
+      const huggerSpriteIndex = huggerSprite.messages.findIndex((m) => m.messageText === '💜');
+      huggerSprite.state.isShowingMessage = false;
+      huggerSprite.state.key = 'walk';
+
+      if (huggerSpriteIndex > -1) {
+        huggerSprite.messages.splice(huggerSpriteIndex, 1);
+      }
     }
-    if (sprite2 && sprites[user2]) {
-      sprite2.state.isShowingMessage = false;
-      sprite2.state.key = 'walk';
-      const idx = sprite2.messages.findIndex((m) => m.messageText === '💜');
-      if (idx > -1) sprite2.messages.splice(idx, 1);
+
+    if (huggedSprite && sprites[huggedUser]) {
+      const huggedSpriteIndex = huggedSprite.messages.findIndex((m) => m.messageText === '💜');
+      huggedSprite.state.isShowingMessage = false;
+      huggedSprite.state.key = 'walk';
+
+      if (huggedSpriteIndex > -1) {
+        huggedSprite.messages.splice(huggedSpriteIndex, 1);
+      }
     }
   }, 3000);
 }
@@ -178,24 +223,82 @@ function updateContainerWidth(): void {
 }
 
 function debouncedResize(): void {
-  if (resizeTimeout) clearTimeout(resizeTimeout);
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout);
+  }
+
   resizeTimeout = setTimeout(updateContainerWidth, 100);
+}
+
+async function syncSpritesToDom(): Promise<void> {
+  await nextTick();
+
+  if (!spritesTemplateRef.value) {
+    return;
+  }
+
+  Object.entries(sprites).forEach(([username, sprite]) => {
+    if (!spriteElements.has(username)) {
+      const safeUsername = CSS.escape(username) ?? username;
+      const spriteElement: HTMLElement | null | undefined = spritesTemplateRef.value?.querySelector(
+        `[data-username="${safeUsername}"]`,
+      );
+
+      if (spriteElement) {
+        const walkStart = BUBBLE_HALF_WIDTH;
+        const walkEnd = boundingClientRectWidth.value - BUBBLE_HALF_WIDTH - sprite.size;
+        const walkRange = Math.max(0, walkEnd - walkStart);
+        const randomX = walkStart + Math.floor(Math.random() * walkRange);
+
+        spriteElements.set(username, spriteElement);
+        spriteElement.style.transform = `translate3d(${randomX}px, 0, 0)`;
+        sprite.state.key = sprite.messages.length > 0 ? 'talk' : 'walk';
+        sprite.position = { x: randomX, y: 0 };
+
+        if (!spriteAnimations.has(username)) {
+          spriteAnimations.set(
+            username,
+            new SpriteAnimation({
+              posX: randomX,
+              deltaX: Math.random() < 0.5 ? -1 : 1,
+              speed: sprite.speed ?? 1,
+              bounds: {
+                start: walkStart,
+                end: walkEnd,
+              },
+            }),
+          );
+        }
+      }
+    }
+  });
+
+  /**
+   * Clean up any removed sprites
+   */
+  spriteElements.forEach((_, username) => {
+    if (!sprites[username]) {
+      spriteElements.delete(username);
+      spriteAnimations.delete(username);
+    }
+  });
 }
 
 onMounted(() => {
   isMounted.value = true;
   updateContainerWidth();
+  void syncSpritesToDom();
   window.addEventListener('resize', debouncedResize);
-
-  /**
-   * Start the animation loop
-   */
   animationFrameId = requestAnimationFrame(spriteAnimationLoop);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', debouncedResize);
-  if (resizeTimeout) clearTimeout(resizeTimeout);
+
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout);
+  }
+
   cancelAnimationFrame(animationFrameId);
   pendingTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
   pendingTimeouts.clear();
@@ -215,58 +318,13 @@ watch(spritesTemplateRef, (newValue) => {
 watch(
   spriteVersion,
   async () => {
-    await nextTick();
-
-    if (!spritesTemplateRef.value) {
-      return;
-    }
-
-    Object.entries(sprites).forEach(([username, sprite]) => {
-      if (!spriteElements.has(username)) {
-        const spriteElement: HTMLElement | null | undefined =
-          spritesTemplateRef.value?.querySelector(`[data-username="${username}"]`);
-
-        if (spriteElement) {
-          spriteElements.set(username, spriteElement);
-          sprite.state.key = sprite.messages.length > 0 ? 'talk' : 'walk';
-
-          const walkStart = BUBBLE_HALF_WIDTH;
-          const walkEnd = boundingClientRectWidth.value - BUBBLE_HALF_WIDTH - sprite.size;
-          const walkRange = Math.max(0, walkEnd - walkStart);
-          const randomX = walkStart + Math.floor(Math.random() * walkRange);
-          sprite.position = { x: randomX, y: 0 };
-          spriteElement.style.transform = `translate3d(${randomX}px, 0, 0)`;
-
-          if (!spriteAnimations.has(username)) {
-            spriteAnimations.set(
-              username,
-              new SpriteAnimation({
-                posX: randomX,
-                deltaX: Math.random() < 0.5 ? -1 : 1,
-                speed: sprite.speed ?? 1,
-                bounds: {
-                  start: walkStart,
-                  end: walkEnd,
-                },
-              }),
-            );
-          }
-        }
-      }
-    });
-
-    spriteElements.forEach((_, username) => {
-      if (!sprites[username]) {
-        spriteElements.delete(username);
-        spriteAnimations.delete(username);
-      }
-    });
+    await syncSpritesToDom();
   },
   { immediate: true },
 );
 
 /**
- * Our animation Loop. Controls the active sprite animation on class SpriteAnimation
+ * Animation loop - controls sprite movement via SpriteAnimation class
  */
 function spriteAnimationLoop(): void {
   if (!isMounted.value) {
@@ -278,15 +336,21 @@ function spriteAnimationLoop(): void {
   spriteElements.forEach((_, username) => {
     const sprite = sprites[username];
 
-    if (!sprite) return;
+    if (!sprite) {
+      return;
+    }
 
     const animation = spriteAnimations.get(username);
 
-    if (!animation) return;
+    if (!animation) {
+      return;
+    }
 
     const isRunning = animation.isRunning;
 
-    if (!isRunning && (sprite.state.key === 'idle' || sprite.state.key === 'talk')) return;
+    if (!isRunning && (sprite.state.key === 'idle' || sprite.state.key === 'talk')) {
+      return;
+    }
 
     const result = animation.animateWalk();
     sprite.state.isRunning = result.isRunning ?? false;
@@ -349,12 +413,14 @@ watch(
   () => Object.entries(sprites).length,
   (length) => {
     if (length > 0 && spritesTemplateRef.value) {
+      void syncSpritesToDom();
       /**
        * If we have sprites, start the animation loop
        */
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
+
       animationFrameId = requestAnimationFrame(spriteAnimationLoop);
     }
   },

@@ -24,6 +24,7 @@ export interface SpriteState {
 
 export interface Sprite {
   username: string;
+  spriteKey?: string;
   color: string;
   messages: Message[];
   state: SpriteState;
@@ -37,6 +38,40 @@ export interface Sprite {
 export type Sprites = Record<string, Sprite>;
 
 export const spriteVersion = ref(0);
+
+const BOT_KEY = 'super_ducky_bot';
+const BOT_NAME = 'Super_Ducky_Bot';
+
+function duckyEggCracksOpen(): void {
+  if (sprites[BOT_KEY]) return;
+
+  const size: number = getRandomSpriteSize();
+  const speed: number = getSpriteSpeed(size);
+
+  sprites[BOT_KEY] = {
+    username: BOT_NAME,
+    spriteKey: BOT_KEY,
+    color: '#ffcc66',
+    messages: [],
+    state: {
+      key: 'walk',
+      isPausedTimeout: null,
+      isPausedDuration: 0,
+      isShowingMessageTimeout: null,
+      isShowingMessage: false,
+      isRunning: false,
+      // effectively never expire
+      expiration: Date.now() + 1000 * 60 * 60 * 24 * 365,
+    },
+    size: size,
+    speed: speed,
+    position: { x: 0, y: 0 },
+    deltaX: 1,
+    animation: null,
+  };
+
+  notifySpriteChange();
+}
 
 export function notifySpriteChange(): void {
   spriteVersion.value++;
@@ -121,6 +156,11 @@ export const sprites: Sprites = reactive(initMockSprites(0) as Sprites);
 /**
  * Spawn mock sprites over a duration
  */
-// spawnMockSpritesOverTime(5, 10_000);
+//spawnMockSpritesOverTime(5, 10_000);
+
+/**
+ * Auto spawn Super Ducky Bot
+ */
+//duckyEggCracksOpen();
 
 export default sprites;

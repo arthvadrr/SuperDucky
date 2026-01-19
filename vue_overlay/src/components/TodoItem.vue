@@ -1,16 +1,83 @@
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import type { Task } from '@/types/Task';
 
-defineProps<{
+const props = defineProps<{
   task: Task;
 }>();
+
+const now = ref(Date.now());
+const isCompleted = computed(() => !!props.task.completed_at);
+let intervalId: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Check if it already has a timezone (Z or +/-HH:MM)
+ * Do SQL to JS YYYY-MM-DD HH:MM:SS -> YYYY-MM-DDTHH:MM:SSZ
+ * If there is still no explicit timezone, treat it as UTC.
+ */
+function parseTime(time: string): number {
+  let trimmedTime = time.trim();
+
+  if (/[zZ]$/.test(trimmedTime) || /[+-]\d{2}:?\d{2}$/.test(trimmedTime)) {
+    return new Date(trimmedTime).getTime();
+  }
+
+  if (trimmedTime.includes(' ') && !trimmedTime.includes('T')) {
+    trimmedTime = trimmedTime.replace(' ', 'T');
+  }
+
+  trimmedTime = trimmedTime + 'Z';
+
+  return new Date(trimmedTime).getTime();
+}
+
+function formatDuration(createdAt: string, completedAt: string | null): string {
+  const start = parseTime(createdAt);
+  const end = completedAt ? parseTime(completedAt) : now.value;
+  const totalMinutes = Math.max(0, Math.floor((end - start) / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours}:${String(minutes).padStart(2, '0')}`;
+}
+
+const duration = computed(() => formatDuration(props.task.created_at, props.task.completed_at));
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    now.value = Date.now();
+  }, 60000);
+});
+
+onUnmounted(() => {
+  if (intervalId) {
+    clearInterval(intervalId);
+  }
+});
 </script>
 
 <template>
-  <li class="todo-item">
+  <li
+    class="todo-item"
+    :class="{ completed: isCompleted }"
+  >
     <div class="task-content">
-      <span class="username">{{ task.username }}</span>
-      <span class="task-name">{{ task.task_name }}</span>
+      <div class="task-header">
+        <span class="username">{{ task.username }}</span>
+        <span class="duration">
+          <span
+            v-if="isCompleted"
+            class="checkmark"
+            >✅</span
+          >
+          {{ duration }}
+        </span>
+      </div>
+      <span
+        class="task-name"
+        :class="{ 'crossed-out': isCompleted }"
+        >{{ task.task_name }}</span
+      >
     </div>
     <div
       class="task-likes"
@@ -36,6 +103,12 @@ defineProps<{
   &:hover {
     background: #282828;
   }
+
+  &.completed {
+    background: #1a2a1a;
+    border-color: #2a4a2a;
+    opacity: 0.8;
+  }
 }
 
 .task-content {
@@ -46,10 +119,29 @@ defineProps<{
   flex: 1;
 }
 
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .username {
   font-size: 0.75em;
   color: #ffd94e;
   font-weight: 600;
+}
+
+.duration {
+  font-size: 0.7em;
+  color: #888;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.checkmark {
+  font-size: 0.9em;
 }
 
 .task-name {
@@ -58,6 +150,11 @@ defineProps<{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  &.crossed-out {
+    text-decoration: line-through;
+    color: #888;
+  }
 }
 
 .task-likes {

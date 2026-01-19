@@ -6,7 +6,6 @@ export default async function messageCommand(ctx: MessageEvent): Promise<void> {
 
   /**
    * Make sure we have a command and possibly args
-   * ...args on line 12 to use the rest of the messageText
    */
   if (messageText.startsWith('!')) {
     const [command] = messageText.slice(1).split(' ');
@@ -17,10 +16,14 @@ export default async function messageCommand(ctx: MessageEvent): Promise<void> {
     if (command === 'move' || command === 'walk' || command === 'go') {
       await ctx.reply('quack! 🐥');
 
-      getSocketServer().emit('walkMessage', {
-        message: 'move',
-        username: ctx.userDisplayName,
-      });
+      const io = getSocketServer();
+
+      if (io) {
+        io.emit('walkMessage', {
+          message: 'move',
+          username: ctx.userDisplayName,
+        });
+      }
     }
   }
 }

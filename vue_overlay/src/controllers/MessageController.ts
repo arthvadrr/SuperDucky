@@ -6,15 +6,60 @@ import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 import { EXPIRATION_DURATION, MEGA_SPRITE_SIZE, MEGA_SPRITE_CHANCE } from '@/util/constants.ts';
 import { socket } from '@/socket.ts';
 import type { Message } from '@/stores/messages.ts';
-import type { Sprite } from '@/stores/sprites.ts';
 
-socket.on('message', (ctx): void => {
-  const { username, messageText, command, color } = ctx;
+type IncomingMessagePayload = {
+  displayName?: string;
+  messageText?: string;
+  username?: string;
+  fromUser?: string;
+  message?: string;
+  content?: string;
+  command?: string;
+  color?: string;
+  user?: string;
+  from?: string;
+  text?: string;
+};
+
+function toKey(name: string): string {
+  return name.toLowerCase();
+}
+
+function getUsername(payload: IncomingMessagePayload): string | null {
+  return (payload.username ??
+    payload.user ??
+    payload.displayName ??
+    payload.fromUser ??
+    payload.from ??
+    null) as string | null;
+}
+
+function getMessageText(payload: IncomingMessagePayload): string | null {
+  return (payload.messageText ?? payload.message ?? payload.text ?? payload.content ?? null) as
+    | string
+    | null;
+}
+
+function handleIncomingMessage(ctx: IncomingMessagePayload | null | undefined): void {
+  const raw: IncomingMessagePayload = ctx ?? {};
+  const username = getUsername(raw);
+  const messageText = getMessageText(raw);
+
+  if (!username || !messageText) {
+    return;
+  }
+
+  const command = raw.command;
+  const color = raw.color;
+
+  // normalize key used for storing sprites
+  const key = toKey(username);
+  const displayName = username;
 
   let size: number = getRandomSpriteSize();
   let isMega = false;
 
-  if (!sprites?.[username] && Math.random() < MEGA_SPRITE_CHANCE) {
+  if (!sprites?.[key] && Math.random() < MEGA_SPRITE_CHANCE) {
     size = MEGA_SPRITE_SIZE;
     isMega = true;
   }
@@ -27,12 +72,13 @@ socket.on('message', (ctx): void => {
   };
 
   /**
-   * Create or update sprites
+   * Create or update sprites (keyed by lowercase username)
    */
-  if (!sprites?.[username]) {
+  if (!sprites?.[key]) {
     const nameColor = color ?? getRandomHexColor();
-    sprites[username] = {
-      username: username,
+    sprites[key] = {
+      username: displayName,
+      spriteKey: key,
       color: nameColor,
       messages: [message],
       state: {
@@ -50,23 +96,35 @@ socket.on('message', (ctx): void => {
       deltaX: 1,
       animation: null,
     };
+
+    // also append to global messages history
+    if (messages.length > 50) {
+      messages.shift();
+    }
+    messages.push(message);
+
     notifySpriteChange();
 
     if (isMega) {
-      socket.emit('megaDucky', { username });
+      socket.emit('megaDucky', { username: displayName });
     }
   } else {
-    const { messages: currentMessages }: Partial<Sprite> = sprites[username];
+    const currentMessages = sprites[key].messages;
 
     /**
      * Update the expiration time for inactivity
      */
-    sprites[username].state.expiration = Date.now() + EXPIRATION_DURATION;
+    sprites[key].state.expiration = Date.now() + EXPIRATION_DURATION;
 
     /**
      * Push the message into history
      */
-    if (messageText !== currentMessages[currentMessages.length - 1]) {
+    const lastMsg =
+      currentMessages && currentMessages.length > 0
+        ? currentMessages[currentMessages.length - 1]!.messageText
+        : null;
+
+    if (messageText !== lastMsg) {
       /**
        * Keep a maximum of 50 messages in history
        */
@@ -78,14 +136,33 @@ socket.on('message', (ctx): void => {
        * Store the message in both message and sprite history
        */
       messages.push(message);
-      sprites[username].messages.push(message);
+      sprites[key].messages.push(message);
+      notifySpriteChange();
     }
 
     /**
      * User is updating their color, change it!
      */
     if (command === 'color' && color) {
-      sprites[username].color = color;
+      sprites[key].color = color;
+      notifySpriteChange();
     }
+
+    // keep display name in sync (case may vary per event)
+    sprites[key].username = displayName;
   }
+}
+
+const MESSAGE_EVENTS = [
+  'message',
+  'bot_message',
+  'botMessage',
+  'assistant_message',
+  'assistantMessage',
+  'approved_message',
+  'moderation_approved',
+] as const;
+
+MESSAGE_EVENTS.forEach((eventName) => {
+  socket.on(eventName, handleIncomingMessage);
 });

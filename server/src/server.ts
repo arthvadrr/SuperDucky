@@ -1,8 +1,8 @@
+import { initializeSocketServer } from './socket';
 import router from './api/v1/router';
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
-import { initializeSocketServer } from './socket';
 import type { Express, Response } from 'express';
 import type { Server } from 'http';
 
@@ -14,7 +14,7 @@ export function startServer(): void {
   const port: number = Number(process.env.VITE_SERVER_PORT) ?? 3000;
 
   app.use('/api/v1', router);
-  
+
   app.get('/', (_: unknown, res: Response): void => {
     res.send('SuperDucky is running!');
   });

@@ -5,8 +5,14 @@ import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { MessageEvent, Bot } from '@twurple/easy-bot';
 import { ApiClient } from '@twurple/api';
 import { getSocketServer, setMegaDuckyCallback } from './socket';
-import { createTask, completeTask, likeTask, deleteTask, getAllTasks, type Task } from './db/tasks';
-// import type Excerpt from './types/Excerpt';
+import {
+  createTask,
+  completeTask,
+  likeTask,
+  deleteTask,
+  purgeOldTasks,
+  purgeCompletedTasks,
+} from './db/tasks';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
 dotenv.config({ path: path.resolve(__dirname, '../../.env.server.local') });
@@ -73,10 +79,20 @@ export async function startDucky(): Promise<void> {
   }
 
   /**
-   * Set Interval to purge users
+   * Set Interval to purge users and old tasks
    */
   setInterval((): void => {
     getSocketServer().emit('purge');
+
+    const purgedUsers = purgeOldTasks();
+    purgedUsers.forEach((username) => {
+      getSocketServer().emit('tasks:deleted', { username });
+    });
+
+    const purgedCompleted = purgeCompletedTasks();
+    purgedCompleted.forEach((username) => {
+      getSocketServer().emit('tasks:deleted', { username });
+    });
   }, 10000);
 
   async function emitDuckyBotMessage({
@@ -119,62 +135,58 @@ export async function startDucky(): Promise<void> {
     if (messageText.startsWith('!')) {
       const [ctxCommand, ...args] = messageText.slice(1).split(' ');
 
-      // if (ctxCommand === 'duckylore') {
-      //   try {
-      //     const excerpt_res: Response = await fetch(
-      //       `http://${process.env.VITE_SERVER_HOST}:${process.env.VITE_SERVER_PORT}/api/v1/random-excerpt`,
-      //     );
-
-      //     if (excerpt_res.ok) {
-      //       const excerpt = await excerpt_res.json();
-      //       getSocketServer().emit('excerpt', { excerpt });
-      //     }
-      //   } catch (error) {
-      //     console.error('Failed to fetch excerpt:', error);
-      //     return;
-      //   }
-      // }
-
       if (ctxCommand === 'task') {
         const taskName = args.join(' ').trim();
+
         if (!taskName) {
-          await ctx.reply(`Quack! Give your task a name like: !task Do laundry 🐥`);
+          await ctx.reply(`Give your task a name like: !task Learn the Saxophone 🐥`);
+
           return;
         }
+
         const task = createTask(ctx.userDisplayName ?? '', taskName);
+
         if (task) {
           getSocketServer().emit('tasks:created', task);
           await ctx.reply(`Quack quack! Your task "${taskName}" is now on the board! 🐥✨`);
         } else {
           await ctx.reply(`You already have a task waddle-ing! Finish it first with !done 🐥`);
         }
+
         return;
       }
 
       if (ctxCommand === 'done') {
         const task = completeTask(ctx.userDisplayName ?? '');
+
         if (task) {
-          getSocketServer().emit('tasks:completed', { username: ctx.userDisplayName ?? '' });
+          getSocketServer().emit('tasks:completed', task);
           await ctx.reply(`QUAAACK! 🎉 You crushed "${task.task_name}"! Proud duck moment! 🐥💪`);
         } else {
           await ctx.reply(`No task to complete! Create one with !task 🐥`);
         }
+
         return;
       }
 
       if (ctxCommand === 'like') {
         const targetUser = args[0]?.replace('@', '').trim();
+
         if (!targetUser) {
           await ctx.reply(`Quack! Tell me who to cheer for: !like username 🐥`);
+
           return;
         }
+
         const task = likeTask(targetUser);
+
         if (task) {
           getSocketServer().emit('tasks:liked', { username: targetUser, likes: task.likes });
           await ctx.reply(`Sent love to @${targetUser}'s task! 🐥❤️`);
         } else {
           await ctx.reply(`Couldn't find a task for @${targetUser}! 🐥`);
         }
+
         return;
       }
 
@@ -182,22 +194,30 @@ export async function startDucky(): Promise<void> {
         const mods = await apiClient.moderation.getModerators(ctx.broadcasterId);
         const modIds = mods.data.map((m) => m.userId);
         const isMod = modIds.includes(ctx.userId) || ctx.userId === ctx.broadcasterId;
+
         if (!isMod) {
           await ctx.reply(`Only mods can delete tasks! 🐥🔒`);
+
           return;
         }
+
         const targetUser = args[0]?.replace('@', '').trim();
+
         if (!targetUser) {
           await ctx.reply(`Quack! Specify who: !delete username 🐥`);
+
           return;
         }
+
         const task = deleteTask(targetUser);
+
         if (task) {
           getSocketServer().emit('tasks:deleted', { username: targetUser });
           await ctx.reply(`Removed @${targetUser}'s task! 🐥🗑️`);
         } else {
           await ctx.reply(`No task found for @${targetUser}! 🐥`);
         }
+
         return;
       }
 
@@ -225,15 +245,19 @@ export async function startDucky(): Promise<void> {
 
       if (ctxCommand === 'hug') {
         const targetUser = args[0]?.replace('@', '');
+
         if (!targetUser) {
           await ctx.reply(`Quack! Who do you want to hug? Try !hug @username 🐥💜`);
+
           return;
         }
+
         getSocketServer().emit('hug', {
           fromUser: ctx.userDisplayName ?? '',
           toUser: targetUser,
         });
         await ctx.reply(`${ctx.userDisplayName} sends a big ducky hug to @${targetUser}! 🐥💜`);
+
         return;
       }
 
@@ -241,6 +265,7 @@ export async function startDucky(): Promise<void> {
         getSocketServer().emit('move', {
           username: ctx.userDisplayName ?? '',
         });
+
         return;
       }
 
@@ -256,6 +281,7 @@ export async function startDucky(): Promise<void> {
       });
 
       const mentionMatch = messageText.match(/@(\w+)/);
+
       if (mentionMatch) {
         const mentionedUser = mentionMatch[1];
         getSocketServer().emit('mention', {

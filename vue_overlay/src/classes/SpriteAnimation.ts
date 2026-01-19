@@ -35,21 +35,28 @@ export default class SpriteAnimation {
 
   animateWalk(): AnimationResult {
     const { start, end } = this.bounds;
+    let distance: number;
+    let callback: (() => void) | null;
 
     if (this.targetX !== null) {
-      const distance = this.targetX - this.posX;
+      distance = this.targetX - this.posX;
 
       if (Math.abs(distance) < this.runSpeed) {
         this.posX = this.targetX;
         this.targetX = null;
-        const callback = this.onArriveCallback;
+        callback = this.onArriveCallback;
         this.onArriveCallback = null;
-        if (callback) callback();
+
+        if (callback) {
+          callback();
+        }
+
         return { posX: this.posX, deltaX: this.deltaX, isRunning: false };
       }
 
       this.deltaX = distance > 0 ? 1 : -1;
       this.posX += this.deltaX * this.runSpeed;
+
       return { posX: this.posX, deltaX: this.deltaX, isRunning: true };
     }
 
