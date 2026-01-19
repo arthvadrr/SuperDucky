@@ -8,14 +8,15 @@ import {
 } from '@/util/helpers.ts';
 import type { SpriteStateKey } from '@/stores/sprites.ts';
 
-const { color, username, state, size } = defineProps<{
+const { color, username, state, size, isRunning } = defineProps<{
   color: string;
   username: string;
   state: SpriteStateKey;
   size: number;
+  isRunning?: boolean;
 }>();
 
-const isWalking = computed(() => state === 'walk');
+const isWalking = computed(() => state === 'walk' || isRunning);
 const isIdle = computed(() => state === 'idle');
 const isTalking = computed(() => state === 'talk');
 const footBounceDuration = computed(() => getFootBounceDuration(size));
@@ -197,7 +198,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-timing-function: linear;
   transform-origin: center;
   animation-delay: 0s;
-  will-change: transform;
 }
 
 .walkingRight {
@@ -207,7 +207,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-timing-function: linear;
   transform-origin: center;
   animation-delay: 100ms;
-  will-change: transform;
 }
 
 .blinkingEye {
@@ -215,7 +214,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   transform-origin: center;
-  will-change: transform;
 }
 
 .bobHead {
@@ -223,7 +221,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   transform-origin: center;
-  will-change: transform;
 }
 
 .flappingRight {
@@ -231,7 +228,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   transform-origin: center;
-  will-change: transform;
 }
 
 .flappingLeft {
@@ -239,7 +235,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   transform-origin: center;
-  will-change: transform;
 }
 
 .beakTalking {
@@ -248,7 +243,6 @@ const eyeBlinkDuration = computed(() => getEyeBlinkDuration());
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   transform-origin: top left;
-  will-change: transform;
 }
 
 @keyframes footBounce {

@@ -1,43 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import DuckySVG from '@/components/DuckySVG.vue';
 import DurationBar from '@/components/DurationBar.vue';
 import type { Sprite } from '@/stores/sprites.ts';
 
 const props = defineProps<{
   sprite: Sprite;
-  containerWidth: number;
 }>();
-
-const BUBBLE_WIDTH = 400;
-const HALF_BUBBLE = BUBBLE_WIDTH / 2;
-
-const bubbleOffset = computed(() => {
-  const x = props.sprite.position.x;
-  const halfSprite = props.sprite.size / 2;
-  const spriteCenter = x + halfSprite;
-
-  if (spriteCenter < HALF_BUBBLE) {
-    return HALF_BUBBLE - spriteCenter;
-  }
-  if (spriteCenter > props.containerWidth - HALF_BUBBLE) {
-    return props.containerWidth - HALF_BUBBLE - spriteCenter;
-  }
-  return 0;
-});
 </script>
 
 <template>
   <div
     class="sprite-container"
     :style="{
-      zIndex: props.sprite.state.key === 'talk' ? 100 : 1,
+      zIndex: props.sprite.state.key === 'talk' || props.sprite.state.isShowingMessage ? 100 : 1,
     }"
   >
-    <div
-      class="chat-bubble-container"
-      :style="{ transform: `translateX(${bubbleOffset}px)` }"
-    >
+    <div class="chat-bubble-container">
       <div
         :class="{
           'chat-bubble': true,
@@ -77,6 +55,7 @@ const bubbleOffset = computed(() => {
       :username="props.sprite.username"
       :state="props.sprite.state.key"
       :size="props.sprite.size"
+      :isRunning="props.sprite.state.isRunning"
     />
   </div>
 </template>

@@ -55,7 +55,7 @@ body {
   .grid {
     height: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 0.7fr;
     grid-template-areas:
       'header header sidebar'
       'footer footer sidebar';

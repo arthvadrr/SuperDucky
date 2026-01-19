@@ -7,7 +7,7 @@ import TodoItem from '@/components/TodoItem.vue';
   <div class="todo-list">
     <div class="todo-header">
       <span class="duck-icon">🐥</span>
-      <h2>Ducky Tasks</h2>
+      <h2>Tasks</h2>
     </div>
     <div class="todo-commands">
       <code>!task {name}</code>

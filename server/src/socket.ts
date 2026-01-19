@@ -7,6 +7,11 @@ import { getAllTasks } from './db/tasks';
 dotenv.config({ path: path.resolve(__dirname, '../../.env.shared.local') });
 
 let socketServer: Server;
+let megaDuckyCallback: ((username: string) => void) | null = null;
+
+export function setMegaDuckyCallback(callback: (username: string) => void): void {
+  megaDuckyCallback = callback;
+}
 
 export function initializeSocketServer(httpServer: HTTPServer): void {
   const fesocket = `http://${process.env.VITE_FRONTEND_HOST ?? 'localhost'}:${process.env.VITE_FRONTEND_PORT ?? '3000'}`;
@@ -28,6 +33,12 @@ export function initializeSocketServer(httpServer: HTTPServer): void {
 
     socket.on('tasks:request', () => {
       socket.emit('tasks:init', getAllTasks());
+    });
+
+    socket.on('megaDucky', (data: { username: string }) => {
+      if (megaDuckyCallback) {
+        megaDuckyCallback(data.username);
+      }
     });
 
     socket.on('manual-disconnect', (reason: string) => {

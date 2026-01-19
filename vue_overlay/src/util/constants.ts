@@ -1,8 +1,10 @@
 export const FONT_SIZE: string = '18px';
-export const MAX_SPRITE_SPEED: number = 0.5;
-export const MIN_SPRITE_SPEED: number = 0.3;
-export const MIN_SPRITE_SIZE: number = 40;
-export const MAX_SPRITE_SIZE: number = 75;
+export const MAX_SPRITE_SPEED: number = 0.6;
+export const MIN_SPRITE_SPEED: number = 0.36;
+export const MIN_SPRITE_SIZE: number = 58;
+export const MAX_SPRITE_SIZE: number = 108;
+export const MEGA_SPRITE_SIZE: number = 200;
+export const MEGA_SPRITE_CHANCE: number = 0.0025;
 export const MAX_WING_FLAP_DURATION: number = 16;
 export const MIN_WING_FLAP_DURATION: number = 12;
 export const MAX_HEAD_BOB_DURATION: number = 16;

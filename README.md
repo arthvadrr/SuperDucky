@@ -4,6 +4,20 @@
 
 SuperDucky is my Twitch bot!
 
+## Chat Commands
+
+| Command | Description |
+|---------|-------------|
+| `!color {hex}` | Set your sprite's color (e.g., `!color #FFD94E`) |
+| `!color unset` | Reset to default color |
+| `!task {name}` | Create a task on the TODO list |
+| `!done` | Mark your task as complete |
+| `!like {user}` | Like another user's task |
+| `!delete {user}` | Delete a user's task |
+| `!hug @user` | Both sprites run together and show 💜 |
+| `!move` | Zip your sprite to a random spot at 8x speed |
+| `!commands` | Show available commands in chat |
+
 ## TODO
 
 - Handle user gets banned

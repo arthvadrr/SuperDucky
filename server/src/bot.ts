@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 import { RefreshingAuthProvider, AccessToken } from '@twurple/auth';
 import { MessageEvent, Bot } from '@twurple/easy-bot';
 import { ApiClient } from '@twurple/api';
-import { getSocketServer } from './socket';
+import { getSocketServer, setMegaDuckyCallback } from './socket';
 import { createTask, completeTask, likeTask, deleteTask, getAllTasks, type Task } from './db/tasks';
 // import type Excerpt from './types/Excerpt';
 
@@ -101,6 +101,13 @@ export async function startDucky(): Promise<void> {
 
   const apiClient = new ApiClient({ authProvider });
 
+  setMegaDuckyCallback(async (username: string) => {
+    await bot.say(
+      process.env.VITE_TWITCH_CHANNEL ?? '',
+      `🌟 QUAAACK!!! 🌟 ${username} has evolved into a MEGA DUCKY! Bow before their glorious waddle! 🦆👑✨`,
+    );
+  });
+
   /**
    * Handles a message from the chat
    */
@@ -131,21 +138,15 @@ export async function startDucky(): Promise<void> {
       if (ctxCommand === 'task') {
         const taskName = args.join(' ').trim();
         if (!taskName) {
-          await ctx.reply(
-            `@${ctx.userDisplayName} Quack! Give your task a name like: !task Do laundry 🐥`,
-          );
+          await ctx.reply(`Quack! Give your task a name like: !task Do laundry 🐥`);
           return;
         }
         const task = createTask(ctx.userDisplayName ?? '', taskName);
         if (task) {
           getSocketServer().emit('tasks:created', task);
-          await ctx.reply(
-            `@${ctx.userDisplayName} Quack quack! Your task "${taskName}" is now on the board! 🐥✨`,
-          );
+          await ctx.reply(`Quack quack! Your task "${taskName}" is now on the board! 🐥✨`);
         } else {
-          await ctx.reply(
-            `@${ctx.userDisplayName} You already have a task waddle-ing! Finish it first with !done 🐥`,
-          );
+          await ctx.reply(`You already have a task waddle-ing! Finish it first with !done 🐥`);
         }
         return;
       }
@@ -154,11 +155,9 @@ export async function startDucky(): Promise<void> {
         const task = completeTask(ctx.userDisplayName ?? '');
         if (task) {
           getSocketServer().emit('tasks:completed', { username: ctx.userDisplayName ?? '' });
-          await ctx.reply(
-            `@${ctx.userDisplayName} QUAAACK! 🎉 You crushed "${task.task_name}"! Proud duck moment! 🐥💪`,
-          );
+          await ctx.reply(`QUAAACK! 🎉 You crushed "${task.task_name}"! Proud duck moment! 🐥💪`);
         } else {
-          await ctx.reply(`@${ctx.userDisplayName} No task to complete! Create one with !task 🐥`);
+          await ctx.reply(`No task to complete! Create one with !task 🐥`);
         }
         return;
       }
@@ -166,17 +165,15 @@ export async function startDucky(): Promise<void> {
       if (ctxCommand === 'like') {
         const targetUser = args[0]?.replace('@', '').trim();
         if (!targetUser) {
-          await ctx.reply(
-            `@${ctx.userDisplayName} Quack! Tell me who to cheer for: !like username 🐥`,
-          );
+          await ctx.reply(`Quack! Tell me who to cheer for: !like username 🐥`);
           return;
         }
         const task = likeTask(targetUser);
         if (task) {
           getSocketServer().emit('tasks:liked', { username: targetUser, likes: task.likes });
-          await ctx.reply(`@${ctx.userDisplayName} sent love to @${targetUser}'s task! 🐥❤️`);
+          await ctx.reply(`Sent love to @${targetUser}'s task! 🐥❤️`);
         } else {
-          await ctx.reply(`@${ctx.userDisplayName} Couldn't find a task for @${targetUser}! 🐥`);
+          await ctx.reply(`Couldn't find a task for @${targetUser}! 🐥`);
         }
         return;
       }
@@ -186,20 +183,20 @@ export async function startDucky(): Promise<void> {
         const modIds = mods.data.map((m) => m.userId);
         const isMod = modIds.includes(ctx.userId) || ctx.userId === ctx.broadcasterId;
         if (!isMod) {
-          await ctx.reply(`@${ctx.userDisplayName} Only mods can delete tasks! 🐥🔒`);
+          await ctx.reply(`Only mods can delete tasks! 🐥🔒`);
           return;
         }
         const targetUser = args[0]?.replace('@', '').trim();
         if (!targetUser) {
-          await ctx.reply(`@${ctx.userDisplayName} Quack! Specify who: !delete username 🐥`);
+          await ctx.reply(`Quack! Specify who: !delete username 🐥`);
           return;
         }
         const task = deleteTask(targetUser);
         if (task) {
           getSocketServer().emit('tasks:deleted', { username: targetUser });
-          await ctx.reply(`@${ctx.userDisplayName} removed @${targetUser}'s task! 🐥🗑️`);
+          await ctx.reply(`Removed @${targetUser}'s task! 🐥🗑️`);
         } else {
-          await ctx.reply(`@${ctx.userDisplayName} No task found for @${targetUser}! 🐥`);
+          await ctx.reply(`No task found for @${targetUser}! 🐥`);
         }
         return;
       }
@@ -226,8 +223,29 @@ export async function startDucky(): Promise<void> {
         }
       }
 
+      if (ctxCommand === 'hug') {
+        const targetUser = args[0]?.replace('@', '');
+        if (!targetUser) {
+          await ctx.reply(`Quack! Who do you want to hug? Try !hug @username 🐥💜`);
+          return;
+        }
+        getSocketServer().emit('hug', {
+          fromUser: ctx.userDisplayName ?? '',
+          toUser: targetUser,
+        });
+        await ctx.reply(`${ctx.userDisplayName} sends a big ducky hug to @${targetUser}! 🐥💜`);
+        return;
+      }
+
+      if (ctxCommand === 'move') {
+        getSocketServer().emit('move', {
+          username: ctx.userDisplayName ?? '',
+        });
+        return;
+      }
+
       if (ctxCommand === 'commands') {
-        await ctx.reply('!color {hex}, !task {name}, !done, !like {user}');
+        await ctx.reply('!color {hex}, !task {name}, !done, !like {user}, !hug @user, !move');
       }
     } else {
       getSocketServer().emit('message', {
@@ -236,6 +254,15 @@ export async function startDucky(): Promise<void> {
         messageText,
         username: ctx.userDisplayName ?? '',
       });
+
+      const mentionMatch = messageText.match(/@(\w+)/);
+      if (mentionMatch) {
+        const mentionedUser = mentionMatch[1];
+        getSocketServer().emit('mention', {
+          fromUser: ctx.userDisplayName ?? '',
+          toUser: mentionedUser,
+        });
+      }
     }
   });
 

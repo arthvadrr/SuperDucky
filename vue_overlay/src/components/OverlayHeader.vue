@@ -1,10 +1,8 @@
 <template>
-  <div class="header">Header</div>
+  <div class="header"></div>
 </template>
 
-<script setup lang="ts">
-console.log('header');
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
 /**

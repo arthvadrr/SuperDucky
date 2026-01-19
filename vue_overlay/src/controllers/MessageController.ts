@@ -1,20 +1,24 @@
-import sprites from '@/stores/sprites.ts';
+import sprites, { notifySpriteChange } from '@/stores/sprites.ts';
 import messages from '@/stores/messages.ts';
 import getReadingLength from '@/util/getReadingLength.ts';
 import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
-import { EXPIRATION_DURATION } from '@/util/constants.ts';
+import { EXPIRATION_DURATION, MEGA_SPRITE_SIZE, MEGA_SPRITE_CHANCE } from '@/util/constants.ts';
 import { socket } from '@/socket.ts';
 import type { Message } from '@/stores/messages.ts';
 import type { Sprite } from '@/stores/sprites.ts';
 
-/**
- * Listen for messages
- */
 socket.on('message', (ctx): void => {
   const { username, messageText, command, color } = ctx;
 
-  const size: number = getRandomSpriteSize();
+  let size: number = getRandomSpriteSize();
+  let isMega = false;
+
+  if (!sprites?.[username] && Math.random() < MEGA_SPRITE_CHANCE) {
+    size = MEGA_SPRITE_SIZE;
+    isMega = true;
+  }
+
   const speed: number = getSpriteSpeed(size);
 
   const message: Message = {
@@ -37,6 +41,7 @@ socket.on('message', (ctx): void => {
         isPausedDuration: 0,
         isShowingMessageTimeout: null,
         isShowingMessage: false,
+        isRunning: false,
         expiration: Date.now() + EXPIRATION_DURATION,
       },
       size: size,
@@ -45,6 +50,11 @@ socket.on('message', (ctx): void => {
       deltaX: 1,
       animation: null,
     };
+    notifySpriteChange();
+
+    if (isMega) {
+      socket.emit('megaDucky', { username });
+    }
   } else {
     const { messages: currentMessages }: Partial<Sprite> = sprites[username];
 

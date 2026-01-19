@@ -1,13 +1,10 @@
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { getRandomHexColor } from '@/util/getRandomHexColor.ts';
 import { getRandomSpriteSize, getSpriteSpeed } from '@/util/helpers.ts';
 import { EXPIRATION_DURATION } from '@/util/constants.ts';
 import type SpriteAnimation from '@/classes/SpriteAnimation.ts';
 import type { Message } from '@/stores/messages.ts';
 
-/**
- * Types and interfaces
- */
 export type SpriteStateKey = 'idle' | 'walk' | 'talk';
 
 export interface SpritePosition {
@@ -21,6 +18,7 @@ export interface SpriteState {
   isPausedDuration: number | null;
   isShowingMessageTimeout: number | null;
   isShowingMessage: boolean;
+  isRunning: boolean;
   expiration: number;
 }
 
@@ -37,6 +35,12 @@ export interface Sprite {
 }
 
 export type Sprites = Record<string, Sprite>;
+
+export const spriteVersion = ref(0);
+
+export function notifySpriteChange(): void {
+  spriteVersion.value++;
+}
 
 /**
  * Utility to generate mock sprites for development
@@ -59,6 +63,7 @@ export function initMockSprites(count: number = 5): Sprites {
         isPausedDuration: 0,
         isShowingMessageTimeout: null,
         isShowingMessage: false,
+        isRunning: false,
         expiration: Date.now() + EXPIRATION_DURATION,
       },
       size: size,
@@ -93,6 +98,7 @@ export function spawnMockSpritesOverTime(count: number, durationMs: number = 500
             isPausedDuration: 0,
             isShowingMessageTimeout: null,
             isShowingMessage: false,
+            isRunning: false,
             expiration: Date.now() + EXPIRATION_DURATION,
           },
           size: size,
